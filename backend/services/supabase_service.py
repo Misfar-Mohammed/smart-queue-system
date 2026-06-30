@@ -10,6 +10,22 @@ class SupabaseService:
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables")
         self.client: Client = create_client(self.url, self.key)
 
+    def _get_date_range(self, target_date_str=None):
+        if target_date_str:
+            try:
+                # Expected format: YYYY-MM-DD
+                target_date = datetime.datetime.strptime(target_date_str, "%Y-%m-%d")
+                day_start = target_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=datetime.timezone.utc)
+            except ValueError:
+                now = datetime.datetime.now(datetime.timezone.utc)
+                day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            now = datetime.datetime.now(datetime.timezone.utc)
+            day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            
+        day_end = day_start + datetime.timedelta(days=1)
+        return day_start.isoformat(), day_end.isoformat(), day_start
+
     def create_shop(self, shop_name, owner_name, phone, password_hash):
         data = {
             "shop_name": shop_name,
@@ -106,24 +122,29 @@ class SupabaseService:
         member["people_ahead"] = res_ahead.count if res_ahead.count is not None else 0
         return member
 
-    def get_active_queue(self, shop_id):
-        # Fetch active tokens (waiting and serving)
+    def get_active_queue(self, shop_id, target_date=None):
+        # Fetch active tokens (waiting and serving) for the target date
+        start_iso, end_iso, _ = self._get_date_range(target_date)
         res = self.client.table("queue") \
             .select("*") \
             .eq("shop_id", shop_id) \
             .in_("status", ["waiting", "serving"]) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .order("token_number", desc=False) \
             .execute()
         return res.data
 
-    def get_queue_history(self, shop_id):
-        # Fetch completed/skipped history
+    def get_queue_history(self, shop_id, target_date=None):
+        # Fetch completed/skipped history for the target date
+        start_iso, end_iso, _ = self._get_date_range(target_date)
         res = self.client.table("queue") \
             .select("*") \
             .eq("shop_id", shop_id) \
             .in_("status", ["completed", "skipped"]) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .order("time_completed", desc=True) \
-            .limit(50) \
             .execute()
         return res.data
 
@@ -204,44 +225,46 @@ class SupabaseService:
             return None
         return res.data[0]
 
-    def get_dashboard_analytics(self, shop_id):
-        # Analytics for today (or overall if timezone isn't set, let's filter from start of today UTC)
-        now = datetime.datetime.now(datetime.timezone.utc)
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_iso = today_start.isoformat()
+    def get_dashboard_analytics(self, shop_id, target_date=None):
+        # Get start/end range of the selected target date
+        start_iso, end_iso, day_start = self._get_date_range(target_date)
         
-        # Total customers today
+        # Total customers joined on this date
         res_total = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
-            .gte("time_joined", today_start_iso) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .execute()
         total_count = res_total.count if res_total.count is not None else 0
 
-        # Completed customers today
+        # Completed customers joined on this date
         res_completed = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
-            .gte("time_joined", today_start_iso) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .execute()
         completed_count = res_completed.count if res_completed.count is not None else 0
 
-        # Skipped customers today
+        # Skipped customers joined on this date
         res_skipped = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "skipped") \
-            .gte("time_joined", today_start_iso) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .execute()
         skipped_count = res_skipped.count if res_skipped.count is not None else 0
 
-        # Calculate average wait time (in minutes) for completed queue members today
+        # Calculate average wait time (in minutes) for completed queue members on this date
         res_times = self.client.table("queue") \
             .select("time_joined, time_completed") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
-            .gte("time_joined", today_start_iso) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .execute()
 
         durations = []
@@ -253,9 +276,9 @@ class SupabaseService:
         
         avg_wait_time = round(sum(durations) / len(durations), 1) if len(durations) > 0 else 0.0
 
-        # Lecturer feature: Yesterday, This Month, and Last Month metrics
-        yesterday_start = today_start - datetime.timedelta(days=1)
-        yesterday_end = today_start
+        # Calculate relative metrics relative to day_start of selected date
+        yesterday_start = day_start - datetime.timedelta(days=1)
+        yesterday_end = day_start
         res_yesterday = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
@@ -265,22 +288,24 @@ class SupabaseService:
             .execute()
         yesterday_count = res_yesterday.count if res_yesterday.count is not None else 0
 
-        # This Week calculation (starting from Monday of current week)
-        this_week_start = today_start - datetime.timedelta(days=today_start.weekday())
+        # This Week calculation (starting from Monday of selected date's week)
+        this_week_start = day_start - datetime.timedelta(days=day_start.weekday())
         res_this_week = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
             .gte("time_completed", this_week_start.isoformat()) \
+            .lt("time_completed", end_iso) \
             .execute()
         this_week_count = res_this_week.count if res_this_week.count is not None else 0
 
-        this_month_start = today_start.replace(day=1)
+        this_month_start = day_start.replace(day=1)
         res_this_month = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
             .gte("time_completed", this_month_start.isoformat()) \
+            .lt("time_completed", end_iso) \
             .execute()
         this_month_count = res_this_month.count if res_this_month.count is not None else 0
 
@@ -299,7 +324,7 @@ class SupabaseService:
             .execute()
         last_month_count = res_last_month.count if res_last_month.count is not None else 0
 
-        # Lecturer feature: Feedback & Rating aggregation
+        # Feedback & Rating aggregation
         res_ratings = self.client.table("queue") \
             .select("rating") \
             .eq("shop_id", shop_id) \
@@ -309,13 +334,14 @@ class SupabaseService:
         avg_rating = round(sum(ratings) / len(ratings), 1) if len(ratings) > 0 else 0.0
         total_ratings = len(ratings)
 
-        # Lecturer feature: Weekly traffic data (last 7 days)
-        seven_days_ago = today_start - datetime.timedelta(days=6)
+        # Weekly traffic data (last 7 days leading to selected date)
+        seven_days_ago = day_start - datetime.timedelta(days=6)
         res_seven_days = self.client.table("queue") \
             .select("time_completed") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
             .gte("time_completed", seven_days_ago.isoformat()) \
+            .lt("time_completed", end_iso) \
             .execute()
 
         completed_dates = []
@@ -326,7 +352,7 @@ class SupabaseService:
 
         chart_data = []
         for i in range(6, -1, -1):
-            d = (today_start - datetime.timedelta(days=i)).date()
+            d = (day_start - datetime.timedelta(days=i)).date()
             count = completed_dates.count(d)
             chart_data.append({
                 "date": d.strftime("%a %b %d"),
@@ -347,11 +373,14 @@ class SupabaseService:
             "chart_data": chart_data
         }
 
-    def get_export_data(self, shop_id):
-        # Fetch all customers for export
+    def get_export_data(self, shop_id, target_date=None):
+        # Fetch all customers for export on the target date
+        start_iso, end_iso, _ = self._get_date_range(target_date)
         res = self.client.table("queue") \
             .select("name, phone, token_number, status, time_joined") \
             .eq("shop_id", shop_id) \
+            .gte("time_joined", start_iso) \
+            .lt("time_joined", end_iso) \
             .order("token_number", desc=False) \
             .execute()
         return res.data

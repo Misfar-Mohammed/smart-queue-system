@@ -308,14 +308,16 @@ def get_support_contact(current_shop_id):
 @app.route("/api/shop/dashboard-data", methods=["GET"])
 @token_required
 def get_dashboard_data(current_shop_id):
+    target_date = request.args.get("date")
+    
     # Fetch analytics
-    analytics = get_db().get_dashboard_analytics(current_shop_id)
+    analytics = get_db().get_dashboard_analytics(current_shop_id, target_date)
     
     # Fetch active queue
-    active_queue = get_db().get_active_queue(current_shop_id)
+    active_queue = get_db().get_active_queue(current_shop_id, target_date)
     
     # Fetch completed/skipped history
-    history = get_db().get_queue_history(current_shop_id)
+    history = get_db().get_queue_history(current_shop_id, target_date)
 
     return jsonify({
         "analytics": analytics,
@@ -376,7 +378,8 @@ def export_excel(current_shop_id):
     if not shop:
         return jsonify({"message": "Shop not found"}), 404
         
-    raw_data = get_db().get_export_data(current_shop_id)
+    target_date = request.args.get("date")
+    raw_data = get_db().get_export_data(current_shop_id, target_date)
     
     # Check if empty
     if not raw_data:
