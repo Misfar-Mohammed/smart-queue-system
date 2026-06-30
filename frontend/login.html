@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Login - Smart Queue System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- Ambient Gradients -->
+    <div class="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-900/20 blur-[150px] pointer-events-none"></div>
+    <div class="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-violet-900/20 blur-[150px] pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="max-w-7xl mx-auto px-6 w-full h-20 flex items-center justify-between z-10 relative">
+        <a href="index.html" class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <span class="font-outfit font-bold text-xl tracking-wide bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">SmartQueue</span>
+        </a>
+        <button id="api-config-btn" title="Configure Backend URL" class="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Main Section -->
+    <main class="flex-grow flex items-center justify-center px-6 py-12 z-10 relative">
+        <div class="max-w-md w-full glass-panel rounded-2xl p-8 md:p-10 relative">
+            <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500"></div>
+            
+            <div class="text-center mb-8">
+                <h1 class="font-outfit font-extrabold text-3xl text-white mb-2">Welcome Back</h1>
+                <p class="text-slate-400 text-sm">Sign in to manage your shop's active queues.</p>
+            </div>
+
+            <form id="login-form" class="space-y-6">
+                <!-- Phone Field -->
+                <div>
+                    <label for="phone" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                        </span>
+                        <input type="tel" id="phone" required placeholder="e.g. +1 234 567 890" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-3.5 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-all font-medium"/>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </span>
+                        <input type="password" id="password" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-3.5 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-all font-medium"/>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 hover:opacity-95 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-500/20 text-sm tracking-wide">
+                    Sign In to Dashboard
+                </button>
+            </form>
+
+            <div class="mt-8 text-center border-t border-slate-900 pt-6 text-sm text-slate-400">
+                Don't have an account? 
+                <a href="register.html" class="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">Register here</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-slate-500 text-xs border-t border-slate-900/50">
+        <p>&copy; 2026 SmartQueue. All rights reserved.</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Redirect if already authenticated
+        if (Auth.isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Form Validation
+            if (!phone || !password) {
+                Toast.show('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Set Loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+            `;
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, password })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Login failed');
+                }
+
+                // Save token and shop data
+                Auth.setToken(result.token);
+                Auth.setShop(result.shop);
+
+                Toast.show('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+
+            } catch (error) {
+                Toast.show(error.message, 'error');
+                // Reset submit button state
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Sign In to Dashboard';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Queue Ticket - Smart Queue System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Outfit & Inter -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .pulse-border {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- Ambient background glows -->
+    <div
+        class="absolute top-[-25%] left-[-25%] w-[70%] h-[70%] rounded-full bg-indigo-900/15 blur-[180px] pointer-events-none">
+    </div>
+    <div
+        class="absolute bottom-[-25%] right-[-25%] w-[70%] h-[70%] rounded-full bg-violet-900/15 blur-[180px] pointer-events-none">
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="max-w-7xl mx-auto px-6 w-full h-20 flex items-center justify-between z-10 relative">
+        <a href="index.html" class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <span
+                class="font-outfit font-bold text-xl tracking-wide bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">SmartQueue</span>
+        </a>
+    </header>
+
+    <!-- Main Entry Container -->
+    <main class="flex-grow flex items-center justify-center px-6 py-12 z-10 relative">
+        <div class="max-w-md w-full glass-panel rounded-3xl p-8 relative overflow-hidden">
+            <div
+                class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500">
+            </div>
+
+            <!-- Loader -->
+            <div id="ticket-loader" class="text-center py-10">
+                <svg class="animate-spin h-10 w-10 text-indigo-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <p class="text-slate-400 text-sm font-semibold">Loading ticket data...</p>
+            </div>
+
+            <!-- Ticket Details Display -->
+            <div id="ticket-container" class="hidden space-y-8">
+
+                <!-- Ticket Banner -->
+                <div class="text-center">
+                    <h2 id="shop-name-label" class="font-outfit font-bold text-xl text-slate-400">Shop Name</h2>
+                    <p class="text-slate-500 text-xs mt-1">Live Queue Ticket</p>
+                </div>
+
+                <!-- Central Token visual card -->
+                <div
+                    class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 text-center relative overflow-hidden">
+                    <span id="ticket-status-label"
+                        class="text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full absolute top-4 right-4">Waiting</span>
+
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-4">Your Token Number
+                    </div>
+                    <div id="ticket-number" class="font-outfit font-extrabold text-7xl text-white my-4">#0</div>
+
+                    <div class="text-slate-400 font-semibold text-sm" id="customer-name">John Doe</div>
+                </div>
+
+                <!-- WhatsApp Notification Indicator -->
+                <div class="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3.5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.012 2c-5.506 0-9.988 4.47-9.988 9.952 0 1.76.46 3.41 1.262 4.86L2 22l5.364-1.405c1.4.76 2.99 1.196 4.648 1.196 5.507 0 9.988-4.47 9.988-9.952C22 6.47 17.518 2 12.012 2zm6.073 14.25c-.25.7-1.44 1.28-2.01 1.34-.54.06-1.08.09-3.48-.86-2.9-1.15-4.77-4.07-4.91-4.27-.15-.19-1.17-1.55-1.17-2.96 0-1.41.74-2.11 1-2.41.27-.3.59-.38.79-.38.2 0 .39 0 .57.01.19 0 .44-.08.69.5.25.59.85 2.05.92 2.19.08.15.13.32.03.51-.1.2-.15.32-.3.49-.15.17-.31.39-.45.52-.15.15-.31.31-.13.62.18.3.79 1.29 1.7 2.1.18.16.35.32.55.42.2.1.39.08.54-.08.15-.17.64-.74.82-.99.18-.25.35-.2.59-.11.25.09 1.58.74 1.85.88.27.14.45.2.52.32.07.12.07.7-.18 1.4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold uppercase block">WhatsApp Alerts Active</span>
+                            <span class="text-xs text-slate-300 block leading-tight">Notification sent when it is your turn</span>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase">SMS Active</span>
+                </div>
+
+                <!-- QUEUE STATUS BLOCKS -->
+                <div id="live-metrics-panel" class="grid grid-cols-2 gap-4">
+                    <!-- Current Serving block -->
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-xl p-4 text-center">
+                        <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Now
+                            Serving</span>
+                        <div id="current-serving" class="font-outfit font-bold text-2xl text-white mt-1">None</div>
+                    </div>
+                    <!-- Position Ahead block -->
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-xl p-4 text-center">
+                        <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">People
+                            Ahead</span>
+                        <div id="people-ahead" class="font-outfit font-bold text-2xl text-white mt-1">0</div>
+                    </div>
+                </div>
+
+                <!-- Estimated Wait Time Box -->
+                <div id="wait-time-panel"
+                    class="bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-left">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 font-semibold block uppercase">Estimated Wait</span>
+                            <span id="wait-time-val" class="font-outfit font-bold text-base text-white">0 Mins</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md">~5m
+                        per person</span>
+                </div>
+
+                <!-- FINAL SCENARIOS STATES PANELS -->
+                <div id="completed-state-panel"
+                    class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-6 text-center space-y-4">
+                    <div
+                        class="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-outfit font-bold text-lg text-white">Your turn is completed!</h3>
+                        <p class="text-xs text-slate-400 mt-1">Thank you for visiting! Let us know how we did.</p>
+                    </div>
+
+                    <!-- Feedback form -->
+                    <div id="feedback-form-box" class="border-t border-slate-800/80 pt-4 text-left space-y-4">
+                        <div>
+                            <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">Rate Your Experience</span>
+                            <!-- Stars Selector -->
+                            <div class="flex justify-center gap-2 text-slate-600" id="star-rating-container">
+                                <button type="button" data-rating="1" class="star-btn p-1 transition-all hover:scale-110 hover:text-amber-400 focus:outline-none">
+                                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                </button>
+                                <button type="button" data-rating="2" class="star-btn p-1 transition-all hover:scale-110 hover:text-amber-400 focus:outline-none">
+                                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                </button>
+                                <button type="button" data-rating="3" class="star-btn p-1 transition-all hover:scale-110 hover:text-amber-400 focus:outline-none">
+                                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                </button>
+                                <button type="button" data-rating="4" class="star-btn p-1 transition-all hover:scale-110 hover:text-amber-400 focus:outline-none">
+                                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                </button>
+                                <button type="button" data-rating="5" class="star-btn p-1 transition-all hover:scale-110 hover:text-amber-400 focus:outline-none">
+                                    <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="feedback-text" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Leave a Comment (Optional)</label>
+                            <textarea id="feedback-text" rows="2" placeholder="Tell us how we can improve..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 transition-all resize-none"></textarea>
+                        </div>
+
+                        <button type="button" id="btn-submit-feedback" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-white font-bold rounded-xl transition-all shadow-md text-xs tracking-wider uppercase">
+                            Submit Review
+                        </button>
+                    </div>
+
+                    <!-- Submitted Success View -->
+                    <div id="feedback-success-box" class="hidden text-center py-2">
+                        <p class="text-xs text-emerald-400 font-medium">⭐ Thank you! Your rating and comments have been recorded.</p>
+                    </div>
+                </div>
+
+                <div id="skipped-state-panel"
+                    class="hidden bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl p-6 text-center space-y-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center mx-auto text-rose-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="font-outfit font-bold text-lg text-white">Turn Missed</h3>
+                    <p class="text-xs text-slate-400">⚠️ You missed your turn.</p>
+                </div>
+
+                <div class="text-center pt-2">
+                    <span class="text-[10px] text-slate-500 font-semibold tracking-wider uppercase block">Keep this page
+                        open</span>
+                    <span class="text-[9px] text-slate-600 block mt-0.5">Refreshes automatically every 2-3
+                        seconds</span>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="error-container" class="hidden text-center py-6">
+                <div
+                    class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-white font-bold text-lg">Ticket Not Found</h3>
+                <p id="error-message" class="text-slate-400 text-xs mt-2">The ticket does not exist or has expired.</p>
+                <a href="index.html"
+                    class="inline-block mt-6 text-sm font-semibold text-indigo-400 hover:underline">Back to Landing
+                    Page</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-slate-500 text-xs border-t border-slate-900/50">
+        <p>&copy; 2026 SmartQueue. All rights reserved.</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Parse URL query parameter: ?id=UUID
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = urlParams.get('id');
+
+        const loader = document.getElementById('ticket-loader');
+        const ticketContainer = document.getElementById('ticket-container');
+        const errorContainer = document.getElementById('error-container');
+        const errorMsg = document.getElementById('error-message');
+
+        if (!ticketId) {
+            loader.classList.add('hidden');
+            errorContainer.classList.remove('hidden');
+            errorMsg.innerText = 'No Ticket ID was provided. Please check your link or scan again.';
+        } else {
+            // First load execution
+            fetchTicketDetails(true);
+
+            // Poll for changes every 2.5 seconds
+            const pollingInterval = setInterval(fetchTicketDetails, 2500);
+
+            // Clean up interval if page is hidden
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    clearInterval(pollingInterval);
+                } else {
+                    fetchTicketDetails(false);
+                    setInterval(fetchTicketDetails, 2500);
+                }
+            });
+        }
+
+        let isNotificationAlerted = false;
+
+        async function fetchTicketDetails(isInitial = false) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/queue/${ticketId}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Ticket lookup failed');
+                }
+
+                // Render views on initial load or subsequent syncs
+                if (isInitial) {
+                    document.getElementById('shop-name-label').innerText = data.shop_name;
+                    document.getElementById('customer-name').innerText = data.name;
+                    document.getElementById('ticket-number').innerText = `#${data.token_number}`;
+
+                    loader.classList.add('hidden');
+                    ticketContainer.classList.remove('hidden');
+                }
+
+                // Get UI elements
+                const statusLabel = document.getElementById('ticket-status-label');
+                const liveMetrics = document.getElementById('live-metrics-panel');
+                const waitTimePanel = document.getElementById('wait-time-panel');
+                const completedPanel = document.getElementById('completed-state-panel');
+                const skippedPanel = document.getElementById('skipped-state-panel');
+
+                // Update metrics values
+                document.getElementById('current-serving').innerText = data.current_serving ? `#${data.current_serving}` : 'None';
+                document.getElementById('people-ahead').innerText = data.people_ahead;
+
+                // Wait time heuristic: 5 minutes per person ahead
+                const waitMins = data.people_ahead * 5;
+                document.getElementById('wait-time-val').innerText = waitMins === 0 ? 'Your Turn Next!' : `${waitMins} Mins`;
+
+                // Handle status mappings: 'waiting', 'serving', 'completed', 'skipped'
+                if (data.status === 'completed') {
+                    statusLabel.className = 'text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full absolute top-4 right-4';
+                    statusLabel.innerText = 'Completed';
+
+                    liveMetrics.classList.add('hidden');
+                    waitTimePanel.classList.add('hidden');
+                    completedPanel.classList.remove('hidden');
+                    skippedPanel.classList.add('hidden');
+
+                    // Stop polling once completed
+                    clearInterval(pollingInterval);
+                }
+                else if (data.status === 'skipped') {
+                    statusLabel.className = 'text-[10px] font-bold uppercase tracking-wider bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1 rounded-full absolute top-4 right-4';
+                    statusLabel.innerText = 'Skipped';
+
+                    liveMetrics.classList.add('hidden');
+                    waitTimePanel.classList.add('hidden');
+                    completedPanel.classList.add('hidden');
+                    skippedPanel.classList.remove('hidden');
+
+                    // Stop polling once skipped
+                    clearInterval(pollingInterval);
+                }
+                else if (data.status === 'serving') {
+                    statusLabel.className = 'text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 border border-amber-500/20 text-amber-400 px-3 py-1 rounded-full absolute top-4 right-4 animate-pulse';
+                    statusLabel.innerText = 'Now Serving';
+
+                    // Display alert notification to user
+                    if (!isNotificationAlerted) {
+                        Toast.show('🔔 It is your turn! Please proceed to the counter.', 'success');
+                        // Vibrate phone if supported
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate([200, 100, 200]);
+                        }
+                        
+                        // Play Voice Notification
+                        if ('speechSynthesis' in window) {
+                            const utterance = new SpeechSynthesisUtterance(`Attention please, it is your turn! Token number ${data.token_number}, please proceed to the counter.`);
+                            utterance.rate = 0.9;
+                            utterance.pitch = 1.1;
+                            window.speechSynthesis.speak(utterance);
+                        }
+
+                        isNotificationAlerted = true;
+                    }
+
+                    document.getElementById('people-ahead').innerText = '0';
+                    document.getElementById('wait-time-val').innerText = 'Proceed Now';
+                }
+                else {
+                    statusLabel.className = 'text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full absolute top-4 right-4';
+                    statusLabel.innerText = 'Waiting';
+                    isNotificationAlerted = false;
+                }
+
+            } catch (err) {
+                console.error(err);
+                if (isInitial) {
+                    loader.classList.add('hidden');
+                    errorContainer.classList.remove('hidden');
+                    errorMsg.innerText = err.message || 'Connecting to queue server failed.';
+                }
+            }
+        }
+
+        // Star feedback rating handling
+        let selectedRating = 0;
+        document.addEventListener('DOMContentLoaded', () => {
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    selectedRating = parseInt(star.getAttribute('data-rating'));
+                    // Highlight selected stars and dim others
+                    stars.forEach(s => {
+                        const r = parseInt(s.getAttribute('data-rating'));
+                        if (r <= selectedRating) {
+                            s.classList.remove('text-slate-600');
+                            s.classList.add('text-amber-400');
+                        } else {
+                            s.classList.remove('text-amber-400');
+                            s.classList.add('text-slate-600');
+                        }
+                    });
+                });
+            });
+
+            const submitFeedbackBtn = document.getElementById('btn-submit-feedback');
+            if (submitFeedbackBtn) {
+                submitFeedbackBtn.addEventListener('click', async () => {
+                    if (selectedRating === 0) {
+                        Toast.show('Please select a rating star first!', 'warning');
+                        return;
+                    }
+
+                    const feedbackText = document.getElementById('feedback-text').value.trim();
+                    submitFeedbackBtn.disabled = true;
+                    submitFeedbackBtn.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                    `;
+
+                    try {
+                        const response = await fetch(`${CONFIG.API_BASE_URL}/queue/${ticketId}/feedback`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                rating: selectedRating,
+                                feedback: feedbackText
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.message || 'Failed to submit feedback');
+                        }
+
+                        // Transition views
+                        document.getElementById('feedback-form-box').classList.add('hidden');
+                        document.getElementById('feedback-success-box').classList.remove('hidden');
+                        Toast.show('Thank you for your feedback!', 'success');
+                    } catch (e) {
+                        Toast.show(e.message, 'error');
+                        submitFeedbackBtn.disabled = false;
+                        submitFeedbackBtn.innerText = 'Submit Review';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

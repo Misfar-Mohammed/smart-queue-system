@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Queue System - Multi-Shop SaaS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-effect {
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen overflow-x-hidden relative">
+
+    <!-- Ambient Gradients -->
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/20 blur-[150px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-900/20 blur-[150px] pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-900 sticky top-0 bg-slate-950/80 backdrop-blur-md z-40">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="font-outfit font-bold text-xl tracking-wide bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">SmartQueue</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                <a href="#how-it-works" class="hover:text-white transition-colors">How it Works</a>
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+                <a href="#demo" class="hover:text-white transition-colors">Join Demo</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <button id="api-config-btn" title="Configure Backend URL" class="p-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+                <a href="login.html" class="text-sm font-semibold text-slate-300 hover:text-white px-4 py-2 transition-colors">Sign In</a>
+                <a href="register.html" class="text-sm font-semibold bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02]">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="max-w-7xl mx-auto px-6 pt-16 pb-24 text-center relative z-10">
+        <div class="inline-flex items-center gap-2.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-8">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
+            Multi-Shop SaaS Queue Solution
+        </div>
+        
+        <h1 class="font-outfit font-extrabold text-5xl md:text-7xl tracking-tight leading-tight max-w-4xl mx-auto mb-6">
+            Eliminate Physical Waiting. <br/>
+            <span class="bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">Delight Customers.</span>
+        </h1>
+        
+        <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+            Give your customers the freedom to join your queue from anywhere by scanning a QR code. Manage traffic, decrease wait times, and export advanced queue analytics.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-20">
+            <a href="register.html" class="w-full sm:w-auto text-center font-semibold bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 text-white px-8 py-4 rounded-xl shadow-xl shadow-indigo-500/15 hover:opacity-95 transition-all hover:scale-[1.03] text-lg">
+                Register Your Shop
+            </a>
+            <a href="#how-it-works" class="w-full sm:w-auto text-center font-semibold border border-slate-800 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white px-8 py-4 rounded-xl transition-all text-lg">
+                See How It Works
+            </a>
+        </div>
+
+        <!-- Dashboard Preview Graphic -->
+        <div class="glass-panel rounded-2xl p-4 md:p-6 max-w-5xl mx-auto glow-effect relative group overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500"></div>
+            <div class="bg-slate-950 rounded-xl border border-slate-900 p-6 md:p-10 flex flex-col md:flex-row gap-8 items-center text-left">
+                <div class="flex-1">
+                    <h3 class="font-outfit font-bold text-2xl mb-3 text-white">Advanced Live Dashboard</h3>
+                    <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                        Control your queue in real time. Call next, skip absentees, search customer details, download Excel spreadsheets, and view overall analytics dynamically updated via live polling.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Live Polling Active
+                        </span>
+                        <span class="flex items-center gap-2 text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Instant Excel Exports
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full md:w-[320px] glass-panel rounded-xl p-5 border border-slate-800 flex flex-col items-center justify-center text-center">
+                    <div class="w-48 h-48 bg-slate-900 rounded-xl flex items-center justify-center mb-4 border border-slate-800">
+                        <svg class="w-24 h-24 text-slate-700 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5.008 14h1.984a1 1 0 011 1v4a1 1 0 01-1 1H5.008a1 1 0 01-1-1v-4a1 1 0 011-1z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xs text-slate-500 font-semibold tracking-wider uppercase mb-1">Generated QR code</span>
+                    <span class="text-sm font-outfit font-semibold text-slate-300">Scan to join queue</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section id="how-it-works" class="py-24 border-t border-slate-900 bg-slate-950/50 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-sm font-semibold uppercase text-indigo-400 tracking-widest">Workflow</span>
+                <h2 class="font-outfit font-bold text-3xl md:text-5xl mt-2 text-white">How Simple Is It?</h2>
+                <p class="text-slate-400 max-w-xl mx-auto mt-4 text-base">Four effortless steps to streamline your customer queuing pipeline.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="glass-panel rounded-xl p-6 relative border border-slate-800">
+                    <span class="absolute top-4 right-6 font-outfit font-extrabold text-5xl text-indigo-500/10">01</span>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-outfit font-bold text-lg mb-2 text-white">Shop Registers</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Owner registers shop details securely and creates their business account in seconds.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="glass-panel rounded-xl p-6 relative border border-slate-800">
+                    <span class="absolute top-4 right-6 font-outfit font-extrabold text-5xl text-violet-500/10">02</span>
+                    <div class="w-12 h-12 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5.008 14h1.984a1 1 0 011 1v4a1 1 0 01-1 1H5.008a1 1 0 01-1-1v-4a1 1 0 011-1z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-outfit font-bold text-lg mb-2 text-white">Get Dynamic QR</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Unique customer-facing URL mapping to a high-resolution downloadable QR code.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="glass-panel rounded-xl p-6 relative border border-slate-800">
+                    <span class="absolute top-4 right-6 font-outfit font-extrabold text-5xl text-pink-500/10">03</span>
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-outfit font-bold text-lg mb-2 text-white">Clients Scan & Join</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Customers scan QR with their phone, enter name + phone, and instantly secure a token.</p>
+                </div>
+                <!-- Step 4 -->
+                <div class="glass-panel rounded-xl p-6 relative border border-slate-800">
+                    <span class="absolute top-4 right-6 font-outfit font-extrabold text-5xl text-emerald-500/10">04</span>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-outfit font-bold text-lg mb-2 text-white">Track Live Status</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Customers view queue progression, wait times, and receive turn alerts on their phone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo section -->
+    <section id="demo" class="py-24 border-t border-slate-900">
+        <div class="max-w-md mx-auto px-6">
+            <div class="glass-panel rounded-2xl p-8 border border-slate-800 relative">
+                <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+                <h3 class="font-outfit font-bold text-2xl text-center text-white mb-2">Simulate Client Join</h3>
+                <p class="text-slate-400 text-sm text-center mb-6">Have a shop ID? Input it below to simulate the customer joining flow directly.</p>
+                
+                <form id="demo-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Enter Shop UUID / ID</label>
+                        <input type="text" id="demo-shop-id" required placeholder="e.g. 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 text-sm focus:outline-none focus:border-indigo-500 transition-all font-mono"/>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-100 hover:bg-white text-slate-950 font-bold py-3 rounded-xl transition-all text-sm flex items-center justify-center gap-2">
+                        <span>Go to Join Page</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 py-12 bg-slate-950 text-slate-500 text-sm">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="font-outfit font-semibold text-slate-300">SmartQueue SaaS</span>
+            </div>
+            <p>&copy; 2026 SmartQueue. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- App config scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('demo-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const shopId = document.getElementById('demo-shop-id').value.trim();
+            if (shopId) {
+                window.location.href = `shop.html?id=${shopId}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Environment files (sensitive credentials)
+.env
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local development logs/files
+.vercel/
+.netlify/
+.DS_Store
