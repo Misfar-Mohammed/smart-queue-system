@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts Outfit & Inter -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
@@ -24,171 +24,320 @@
         }
     </script>
     <style>
+        /* ============================================================
+           iOS LIQUID GLASS DESIGN SYSTEM
+           ============================================================ */
+
+        :root {
+            --glass-bg:        rgba(255, 255, 255, 0.07);
+            --glass-border:    rgba(255, 255, 255, 0.18);
+            --glass-shadow:    0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            --glass-blur:      saturate(180%) blur(24px);
+            --orb-1:           rgba(99, 102, 241, 0.35);
+            --orb-2:           rgba(168, 85, 247, 0.28);
+            --orb-3:           rgba(14, 165, 233, 0.22);
+            --text-primary:    rgba(255, 255, 255, 0.95);
+            --text-secondary:  rgba(255, 255, 255, 0.6);
+            --text-muted:      rgba(255, 255, 255, 0.35);
+            --accent-indigo:   #818cf8;
+            --accent-violet:   #c084fc;
+            --accent-emerald:  #34d399;
+            --accent-rose:     #fb7185;
+            --accent-amber:    #fbbf24;
+        }
+
+        /* ---- GLOBAL RESETS ---- */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: #0a0a12;
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease, color 0.4s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ---- ANIMATED BACKGROUND MESH ---- */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 12s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        .orb-1 {
+            width: 55vw; height: 55vw;
+            top: -15%; left: -10%;
+            background: radial-gradient(circle, var(--orb-1) 0%, transparent 70%);
+            animation-duration: 14s;
+        }
+        .orb-2 {
+            width: 45vw; height: 45vw;
+            bottom: -10%; right: -10%;
+            background: radial-gradient(circle, var(--orb-2) 0%, transparent 70%);
+            animation-duration: 18s;
+            animation-delay: -5s;
+        }
+        .orb-3 {
+            width: 35vw; height: 35vw;
+            top: 40%; left: 55%;
+            background: radial-gradient(circle, var(--orb-3) 0%, transparent 70%);
+            animation-duration: 22s;
+            animation-delay: -9s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(3%, 4%) scale(1.06); }
+            66%       { transform: translate(-2%, -3%) scale(0.95); }
+        }
+
+        /* ---- LIQUID GLASS PANEL ---- */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: background 0.35s ease, border-color 0.35s ease,
+                        box-shadow 0.35s ease, transform 0.2s ease;
         }
 
+        .glass-panel:hover {
+            background: rgba(255, 255, 255, 0.10);
+            border-color: rgba(255, 255, 255, 0.26);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+
+        /* Iridescent highlight streak on top edge */
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.12) 0%,
+                rgba(255,255,255,0.0) 50%,
+                rgba(255,255,255,0.04) 100%);
+            pointer-events: none;
+        }
+
+        /* ---- GLASS HEADER / NAV ---- */
+        .glass-header {
+            background: rgba(10, 10, 18, 0.55);
+            backdrop-filter: saturate(200%) blur(32px);
+            -webkit-backdrop-filter: saturate(200%) blur(32px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 24px rgba(0,0,0,0.25),
+                        inset 0 -1px 0 rgba(255,255,255,0.06);
+        }
+
+        /* ---- GLASS BUTTONS ---- */
+        .glass-btn {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25),
+                        inset 0 1px 0 rgba(255,255,255,0.12);
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+        .glass-btn:hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.28);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.35),
+                        inset 0 1px 0 rgba(255,255,255,0.18);
+            transform: translateY(-1px);
+        }
+        .glass-btn:active { transform: translateY(0); }
+
+        /* ---- STAT CARD ACCENT LINES ---- */
+        .stat-card-accent {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 999px 999px 0 0;
+            opacity: 0.7;
+        }
+
+        /* ---- GLOW ACTIVE STATE ---- */
         .active-glow {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.3),
+                        0 0 60px rgba(52, 211, 153, 0.1);
         }
 
+        /* ---- DISABLED BUTTONS ---- */
         button:disabled {
-            opacity: 0.35 !important;
+            opacity: 0.3 !important;
             cursor: not-allowed !important;
             pointer-events: none !important;
             transform: none !important;
             box-shadow: none !important;
+            filter: grayscale(0.4);
         }
 
-        /* ----------------- LIGHT THEME OVERRIDES ----------------- */
-        body {
-            transition: background-color 0.3s ease, color 0.3s ease;
+        /* ---- INPUT LIQUID GLASS ---- */
+        .glass-input {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.14);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: rgba(129, 140, 248, 0.5);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
         }
 
+        /* ---- TABLE ROWS ---- */
+        .glass-row {
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            transition: background 0.15s ease;
+        }
+        .glass-row:hover {
+            background: rgba(255,255,255,0.07);
+        }
+        .glass-row:last-child { border-bottom: none; }
+
+        /* ---- SCROLLBAR ---- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.28);
+        }
+
+        /* ---- LIGHT THEME OVERRIDES ---- */
         .light-theme {
-            background-color: #f8fafc !important; /* slate-50 */
-            color: #0f172a !important; /* slate-900 */
+            background: #e8eaf6 !important;
+            --glass-bg:        rgba(255,255,255,0.55);
+            --glass-border:    rgba(99,102,241,0.18);
+            --glass-shadow:    0 8px 32px rgba(60,60,100,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+            --text-primary:    #0f172a;
+            --text-secondary:  #334155;
+            --text-muted:      #64748b;
         }
-
-        /* Glass Panel overrides in Light Mode */
+        .light-theme body, .light-theme {
+            color: #0f172a !important;
+        }
+        .light-theme .bg-mesh .orb-1 {
+            background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+        }
+        .light-theme .bg-mesh .orb-2 {
+            background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%);
+        }
+        .light-theme .bg-mesh .orb-3 {
+            background: radial-gradient(circle, rgba(14,165,233,0.10) 0%, transparent 70%);
+        }
+        .light-theme .glass-header {
+            background: rgba(232,234,246,0.72) !important;
+            border-bottom-color: rgba(99,102,241,0.12) !important;
+        }
         .light-theme .glass-panel {
-            background: rgba(255, 255, 255, 0.75) !important;
-            border-color: rgba(15, 23, 42, 0.08) !important;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+            background: rgba(255,255,255,0.62) !important;
+            border-color: rgba(99,102,241,0.14) !important;
+            box-shadow: 0 8px 32px rgba(60,60,100,0.10), inset 0 1px 0 rgba(255,255,255,0.95) !important;
         }
-
-        /* Ambient Glow adjustments in Light Mode */
-        .light-theme div[class*="bg-indigo-900/10"],
-        .light-theme div[class*="bg-violet-900/10"] {
-            opacity: 0.25;
+        .light-theme .glass-panel:hover {
+            background: rgba(255,255,255,0.78) !important;
+            box-shadow: 0 12px 40px rgba(60,60,100,0.15), inset 0 1px 0 rgba(255,255,255,1) !important;
         }
-
-        /* Typography colors in Light Mode */
-        .light-theme .text-white {
-            color: #0f172a !important; /* slate-900 */
-        }
-        .light-theme .text-slate-100 {
-            color: #1e293b !important; /* slate-800 */
-        }
-        .light-theme .text-slate-300 {
-            color: #334155 !important; /* slate-700 */
-        }
-        .light-theme .text-slate-400 {
-            color: #475569 !important; /* slate-600 */
-        }
-        .light-theme .text-slate-500 {
-            color: #64748b !important; /* slate-500 */
-        }
-
-        /* Card and Table backgrounds in Light Mode */
-        .light-theme .bg-slate-900,
-        .light-theme .bg-slate-900\/40,
-        .light-theme .bg-slate-900\/50,
-        .light-theme .bg-slate-900\/60,
-        .light-theme #dashboard-date-picker {
-            background-color: #f1f5f9 !important; /* slate-100 */
-            border-color: #e2e8f0 !important; /* slate-200 */
+        .light-theme .glass-btn {
+            background: rgba(255,255,255,0.5) !important;
+            border-color: rgba(99,102,241,0.2) !important;
             color: #0f172a !important;
         }
-
-        .light-theme .bg-slate-950,
-        .light-theme header,
-        .light-theme footer {
-            background-color: #ffffff !important;
-            border-color: #f1f5f9 !important;
+        .light-theme .glass-btn:hover {
+            background: rgba(255,255,255,0.72) !important;
         }
-
-        .light-theme .border-slate-800,
-        .light-theme .border-slate-900,
-        .light-theme .divide-slate-900\/50,
-        .light-theme .divide-slate-900\/30 {
-            border-color: #e2e8f0 !important;
-        }
-
-        /* Text Input & Selection box in Light Mode */
-        .light-theme input,
-        .light-theme select {
-            background-color: #ffffff !important;
-            border-color: #cbd5e1 !important; /* slate-300 */
+        .light-theme .glass-input {
+            background: rgba(255,255,255,0.55) !important;
+            border-color: rgba(99,102,241,0.2) !important;
             color: #0f172a !important;
         }
-
-        /* Button & Tab Adjustments */
-        .light-theme #tab-weekly:not(.bg-indigo-600),
-        .light-theme #tab-comparison:not(.bg-indigo-600) {
-            color: #475569 !important;
+        .light-theme .glass-row {
+            background: rgba(255,255,255,0.22) !important;
+            border-bottom-color: rgba(99,102,241,0.08) !important;
         }
-
-        .light-theme #tab-weekly:hover,
-        .light-theme #tab-comparison:hover {
-            color: #0f172a !important;
+        .light-theme .glass-row:hover {
+            background: rgba(255,255,255,0.5) !important;
         }
-
-        .light-theme button:disabled {
-            background-color: #e2e8f0 !important;
-            border-color: #cbd5e1 !important;
-            color: #94a3b8 !important;
-            opacity: 0.6 !important;
+        .light-theme .text-white { color: #0f172a !important; }
+        .light-theme .text-slate-100 { color: #1e293b !important; }
+        .light-theme .text-slate-300 { color: #334155 !important; }
+        .light-theme .text-slate-400 { color: #475569 !important; }
+        .light-theme .text-slate-500 { color: #64748b !important; }
+        .light-theme ::-webkit-scrollbar-thumb {
+            background: rgba(99,102,241,0.25);
         }
     </style>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+<body class="font-sans min-h-screen relative overflow-x-hidden">
 
-    <!-- Ambient background glows -->
-    <div
-        class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none">
-    </div>
-    <div
-        class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-900/10 blur-[150px] pointer-events-none">
+    <!-- iOS Liquid Glass Animated Background Mesh -->
+    <div class="bg-mesh">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
 
-    <!-- Main Navigation Header -->
-    <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
+    <!-- iOS Liquid Glass Navigation Header -->
+    <header class="glass-header sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-11 h-11 rounded-2xl flex items-center justify-center relative overflow-hidden"
+                     style="background: linear-gradient(135deg, #6366f1, #a855f7); box-shadow: 0 4px 20px rgba(99,102,241,0.45), inset 0 1px 0 rgba(255,255,255,0.3);">
+                    <svg class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div>
-                    <span id="shop-name-brand"
-                        class="font-outfit font-bold text-lg tracking-wide text-white">Dashboard</span>
-                    <span class="text-slate-500 text-xs block -mt-1">Owner Console</span>
+                    <span id="shop-name-brand" class="font-outfit font-bold text-lg tracking-wide" style="color: var(--text-primary);">Dashboard</span>
+                    <span class="text-xs block -mt-0.5" style="color: var(--text-muted);">Owner Console</span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <span
-                    class="hidden md:inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full"
+            <div class="flex items-center gap-3">
+                <span class="hidden md:inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 px-3.5 py-1.5 rounded-full"
+                    style="background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); backdrop-filter: blur(8px);"
                     id="sync-indicator">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                     Live Syncing
                 </span>
 
                 <!-- Theme Toggle Button -->
-                <button id="btn-theme-toggle" class="w-10 h-10 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer" title="Toggle Theme">
-                    <!-- Sun Icon (shows in Dark theme) -->
-                    <svg id="theme-sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="btn-theme-toggle" class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" title="Toggle Theme">
+                    <svg id="theme-sun-icon" class="w-5 h-5" style="color:var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
                     </svg>
-                    <!-- Moon Icon (shows in Light theme) -->
-                    <svg id="theme-moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="theme-moon-icon" class="w-5 h-5 hidden" style="color:var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                     </svg>
                 </button>
 
-                <button onclick="Auth.logout()"
-                    class="text-sm font-semibold border border-slate-800 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+                <button onclick="Auth.logout()" class="glass-btn text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
@@ -215,13 +364,14 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <!-- Date Picker -->
-                    <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5">
-                        <span class="text-xs text-slate-500 font-semibold uppercase select-none">Date:</span>
-                        <input type="date" id="dashboard-date-picker" class="bg-transparent border-0 text-slate-100 text-sm focus:outline-none font-medium cursor-pointer" style="color-scheme: dark;" />
+                    <div class="glass-input flex items-center gap-2 rounded-xl px-3.5 py-2.5">
+                        <svg class="w-4 h-4 flex-shrink-0" style="color:var(--accent-indigo);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <input type="date" id="dashboard-date-picker" class="bg-transparent border-0 text-sm focus:outline-none font-medium cursor-pointer" style="color: var(--text-primary); color-scheme: dark;" />
                     </div>
 
-                    <button id="btn-export"
-                        class="flex-1 sm:flex-initial text-sm font-semibold bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 text-indigo-400 px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <button id="btn-export" class="glass-btn flex-1 sm:flex-initial text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2" style="color: var(--accent-indigo);">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -229,8 +379,7 @@
                         </svg>
                         <span>Export Excel</span>
                     </button>
-                    <button id="btn-reset"
-                        class="flex-1 sm:flex-initial text-sm font-semibold bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-400 px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <button id="btn-reset" class="glass-btn flex-1 sm:flex-initial text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2" style="color: var(--accent-rose);">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -363,41 +512,38 @@
             </div>
 
             <!-- PRIMARY CONTROLS PANEL -->
-            <div class="glass-panel rounded-2xl p-6 border border-slate-800">
-                <h3 class="font-outfit font-bold text-xl text-white mb-4">Queue Controls</h3>
+            <div class="glass-panel rounded-2xl p-6 relative overflow-hidden">
+                <h3 class="font-outfit font-bold text-xl mb-4" style="color: var(--text-primary);">Queue Controls</h3>
 
-                <div
-                    class="flex flex-col md:flex-row items-center justify-between gap-6 bg-slate-900/40 border border-slate-800/80 p-6 rounded-xl">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-5 rounded-2xl relative overflow-hidden"
+                     style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); backdrop-filter: blur(8px);">
                     <div class="flex items-center gap-5 text-left w-full md:w-auto">
-                        <div
-                            class="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-inner">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center relative overflow-hidden"
+                             style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);">
+                            <svg class="w-7 h-7" style="color: var(--accent-indigo);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z">
                                 </path>
                             </svg>
                         </div>
                         <div>
-                            <span class="text-xs text-slate-500 font-semibold tracking-wider uppercase block">Currently
-                                Serving Token</span>
-                            <span id="current-serving-token"
-                                class="font-outfit font-extrabold text-3xl text-white">None</span>
+                            <span class="text-xs font-semibold tracking-wider uppercase block" style="color: var(--text-muted);">Currently Serving Token</span>
+                            <span id="current-serving-token" class="font-outfit font-extrabold text-3xl" style="color: var(--text-primary);">None</span>
                         </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                         <!-- Button 1: Finish Current -->
-                        <button id="btn-finish"
-                            class="w-full sm:w-auto text-sm font-semibold bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <button id="btn-finish" class="glass-btn w-full sm:w-auto text-sm font-semibold px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer" style="color: var(--accent-emerald); border-color: rgba(52,211,153,0.25);">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span>Finish Current</span>
                         </button>
-                        
+
                         <!-- Button 2: Finish & Call Next -->
-                        <button id="btn-next"
-                            class="w-full sm:w-auto text-sm font-bold bg-gradient-to-r from-indigo-500 to-violet-500 hover:opacity-95 text-white px-6 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.01] cursor-pointer">
+                        <button id="btn-next" class="w-full sm:w-auto text-sm font-bold text-white px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+                            style="background: linear-gradient(135deg, #6366f1, #a855f7); box-shadow: 0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.25); transition: all 0.2s ease;">
                             <span>Call Next Ticket</span>
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
@@ -406,8 +552,7 @@
                         </button>
 
                         <!-- Button 3: Skip & Call Next -->
-                        <button id="btn-skip-next"
-                            class="w-full sm:w-auto text-sm font-semibold bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <button id="btn-skip-next" class="glass-btn w-full sm:w-auto text-sm font-semibold px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer" style="color: var(--accent-rose); border-color: rgba(251,113,133,0.25);">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
