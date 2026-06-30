@@ -213,7 +213,7 @@ def get_shop_qr(shop_id):
             frontend_url = "http://localhost:5500" if "5500" in request.headers.get("Referer", "") else "http://localhost:3000"
         else:
             # Production fallback targeting your Netlify frontend
-            frontend_url = "https://smart-q-misfar.netlify.app"
+            frontend_url = "https://soft-sfogliatella-3d4719.netlify.app"
 
     # Clean the URL representation
     frontend_url = frontend_url.rstrip("/")
