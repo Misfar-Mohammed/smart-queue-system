@@ -29,6 +29,7 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .active-glow {
@@ -41,6 +42,97 @@
             pointer-events: none !important;
             transform: none !important;
             box-shadow: none !important;
+        }
+
+        /* ----------------- LIGHT THEME OVERRIDES ----------------- */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .light-theme {
+            background-color: #f8fafc !important; /* slate-50 */
+            color: #0f172a !important; /* slate-900 */
+        }
+
+        /* Glass Panel overrides in Light Mode */
+        .light-theme .glass-panel {
+            background: rgba(255, 255, 255, 0.75) !important;
+            border-color: rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+        }
+
+        /* Ambient Glow adjustments in Light Mode */
+        .light-theme div[class*="bg-indigo-900/10"],
+        .light-theme div[class*="bg-violet-900/10"] {
+            opacity: 0.25;
+        }
+
+        /* Typography colors in Light Mode */
+        .light-theme .text-white {
+            color: #0f172a !important; /* slate-900 */
+        }
+        .light-theme .text-slate-100 {
+            color: #1e293b !important; /* slate-800 */
+        }
+        .light-theme .text-slate-300 {
+            color: #334155 !important; /* slate-700 */
+        }
+        .light-theme .text-slate-400 {
+            color: #475569 !important; /* slate-600 */
+        }
+        .light-theme .text-slate-500 {
+            color: #64748b !important; /* slate-500 */
+        }
+
+        /* Card and Table backgrounds in Light Mode */
+        .light-theme .bg-slate-900,
+        .light-theme .bg-slate-900\/40,
+        .light-theme .bg-slate-900\/50,
+        .light-theme .bg-slate-900\/60,
+        .light-theme #dashboard-date-picker {
+            background-color: #f1f5f9 !important; /* slate-100 */
+            border-color: #e2e8f0 !important; /* slate-200 */
+            color: #0f172a !important;
+        }
+
+        .light-theme .bg-slate-950,
+        .light-theme header,
+        .light-theme footer {
+            background-color: #ffffff !important;
+            border-color: #f1f5f9 !important;
+        }
+
+        .light-theme .border-slate-800,
+        .light-theme .border-slate-900,
+        .light-theme .divide-slate-900\/50,
+        .light-theme .divide-slate-900\/30 {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Text Input & Selection box in Light Mode */
+        .light-theme input,
+        .light-theme select {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important; /* slate-300 */
+            color: #0f172a !important;
+        }
+
+        /* Button & Tab Adjustments */
+        .light-theme #tab-weekly:not(.bg-indigo-600),
+        .light-theme #tab-comparison:not(.bg-indigo-600) {
+            color: #475569 !important;
+        }
+
+        .light-theme #tab-weekly:hover,
+        .light-theme #tab-comparison:hover {
+            color: #0f172a !important;
+        }
+
+        .light-theme button:disabled {
+            background-color: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+            color: #94a3b8 !important;
+            opacity: 0.6 !important;
         }
     </style>
     <!-- Chart.js CDN -->
@@ -82,6 +174,18 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                     Live Syncing
                 </span>
+
+                <!-- Theme Toggle Button -->
+                <button id="btn-theme-toggle" class="w-10 h-10 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer" title="Toggle Theme">
+                    <!-- Sun Icon (shows in Dark theme) -->
+                    <svg id="theme-sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
+                    </svg>
+                    <!-- Moon Icon (shows in Light theme) -->
+                    <svg id="theme-moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
 
                 <button onclick="Auth.logout()"
                     class="text-sm font-semibold border border-slate-800 bg-slate-900/50 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-all flex items-center gap-2">
@@ -1048,6 +1152,9 @@
 
         // Shared chart styling config
         function getChartOptions() {
+            const isLight = document.body.classList.contains('light-theme');
+            const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.05)';
+            const textColor = isLight ? 'rgba(15, 23, 42, 0.6)' : 'rgba(255, 255, 255, 0.5)';
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1059,10 +1166,10 @@
                 scales: {
                     y: {
                         grid: {
-                            color: 'rgba(255, 255, 255, 0.05)'
+                            color: gridColor
                         },
                         ticks: {
-                            color: 'rgba(255, 255, 255, 0.5)',
+                            color: textColor,
                             font: {
                                 size: 10
                             },
@@ -1075,7 +1182,7 @@
                             display: false
                         },
                         ticks: {
-                            color: 'rgba(255, 255, 255, 0.5)',
+                            color: textColor,
                             font: {
                                 size: 10
                             }
@@ -1132,7 +1239,40 @@
             });
         }
 
+        // Setup Theme Toggle (Light / Dark)
+        function initTheme() {
+            const btn = document.getElementById('btn-theme-toggle');
+            const sunIcon = document.getElementById('theme-sun-icon');
+            const moonIcon = document.getElementById('theme-moon-icon');
+            if (!btn) return;
+
+            // Load saved preference
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+            }
+
+            btn.addEventListener('click', () => {
+                const isLight = document.body.classList.toggle('light-theme');
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+                if (isLight) {
+                    if (sunIcon) sunIcon.classList.add('hidden');
+                    if (moonIcon) moonIcon.classList.remove('hidden');
+                } else {
+                    if (sunIcon) sunIcon.classList.remove('hidden');
+                    if (moonIcon) moonIcon.classList.add('hidden');
+                }
+
+                // Re-render chart with new theme colors
+                renderAnalyticsChart();
+            });
+        }
+
         // Run on load
+        initTheme();
         initQrDisplay();
         initSupportDisplay();
         initChartTabs();
