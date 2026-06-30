@@ -768,8 +768,9 @@
             try {
                 const datePicker = document.getElementById('dashboard-date-picker');
                 const selectedDate = datePicker ? datePicker.value : new Date().toLocaleDateString('en-CA');
+                const timezoneOffset = new Date().getTimezoneOffset();
                 
-                const response = await Auth.fetch(`/shop/dashboard-data?date=${selectedDate}`);
+                const response = await Auth.fetch(`/shop/dashboard-data?date=${selectedDate}&timezone_offset=${timezoneOffset}`);
                 if (!response.ok) throw new Error('Failed to load dashboard data');
 
                 const data = await response.json();
@@ -1091,7 +1092,8 @@
             try {
                 const datePicker = document.getElementById('dashboard-date-picker');
                 const selectedDate = datePicker ? datePicker.value : '';
-                const response = await Auth.fetch(`/shop/export?date=${selectedDate}`);
+                const timezoneOffset = new Date().getTimezoneOffset();
+                const response = await Auth.fetch(`/shop/export?date=${selectedDate}&timezone_offset=${timezoneOffset}`);
                 if (!response.ok) throw new Error('Excel generation failed');
 
                 const blob = await response.blob();

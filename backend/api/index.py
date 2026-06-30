@@ -251,6 +251,7 @@ def join_shop_queue(shop_id):
     name = data.get("name")
     phone = data.get("phone")
     service_type = data.get("service_type", "General Inquiry")
+    timezone_offset = data.get("timezone_offset", 0)
 
     if not name or not phone:
         return jsonify({"message": "Name and phone are required to join the queue"}), 400
@@ -259,9 +260,14 @@ def join_shop_queue(shop_id):
     phone = phone.strip()
     if service_type:
         service_type = service_type.strip()
+        
+    try:
+        timezone_offset = int(timezone_offset)
+    except ValueError:
+        timezone_offset = 0
 
     # Enter into database
-    queue_record = get_db().join_queue(shop_id, name, phone, service_type)
+    queue_record = get_db().join_queue(shop_id, name, phone, service_type, timezone_offset)
     if not queue_record:
         return jsonify({"message": "Failed to join queue"}), 500
 
@@ -309,15 +315,20 @@ def get_support_contact(current_shop_id):
 @token_required
 def get_dashboard_data(current_shop_id):
     target_date = request.args.get("date")
+    timezone_offset = request.args.get("timezone_offset", 0)
+    try:
+        timezone_offset = int(timezone_offset)
+    except ValueError:
+        timezone_offset = 0
     
     # Fetch analytics
-    analytics = get_db().get_dashboard_analytics(current_shop_id, target_date)
+    analytics = get_db().get_dashboard_analytics(current_shop_id, target_date, timezone_offset)
     
     # Fetch active queue
-    active_queue = get_db().get_active_queue(current_shop_id, target_date)
+    active_queue = get_db().get_active_queue(current_shop_id, target_date, timezone_offset)
     
     # Fetch completed/skipped history
-    history = get_db().get_queue_history(current_shop_id, target_date)
+    history = get_db().get_queue_history(current_shop_id, target_date, timezone_offset)
 
     return jsonify({
         "analytics": analytics,
@@ -415,7 +426,13 @@ def export_excel(current_shop_id):
         return jsonify({"message": "Shop not found"}), 404
         
     target_date = request.args.get("date")
-    raw_data = get_db().get_export_data(current_shop_id, target_date)
+    timezone_offset = request.args.get("timezone_offset", 0)
+    try:
+        timezone_offset = int(timezone_offset)
+    except ValueError:
+        timezone_offset = 0
+
+    raw_data = get_db().get_export_data(current_shop_id, target_date, timezone_offset)
     
     # Check if empty
     if not raw_data:
@@ -426,8 +443,10 @@ def export_excel(current_shop_id):
         records = []
         for row in raw_data:
             joined_dt = datetime.datetime.fromisoformat(row["time_joined"].replace('Z', '+00:00'))
+            # Shift from UTC back to local timezone
+            local_joined_dt = joined_dt - datetime.timedelta(minutes=timezone_offset)
             # Format time beautifully
-            joined_str = joined_dt.strftime("%Y-%m-%d %I:%M %p UTC")
+            joined_str = local_joined_dt.strftime("%Y-%m-%d %I:%M %p")
             
             records.append({
                 "Shop Name": shop["shop_name"],

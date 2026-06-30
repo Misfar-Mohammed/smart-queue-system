@@ -10,18 +10,28 @@ class SupabaseService:
             raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables")
         self.client: Client = create_client(self.url, self.key)
 
-    def _get_date_range(self, target_date_str=None):
+    def _get_date_range(self, target_date_str=None, timezone_offset=0):
+        # timezone_offset is in minutes (e.g. -420 for UTC+7)
         if target_date_str:
             try:
-                # Expected format: YYYY-MM-DD
+                # Parse target date as local date
                 target_date = datetime.datetime.strptime(target_date_str, "%Y-%m-%d")
-                day_start = target_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=datetime.timezone.utc)
+                local_start = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                # Convert to UTC by adding offset
+                day_start = local_start + datetime.timedelta(minutes=timezone_offset)
+                day_start = day_start.replace(tzinfo=datetime.timezone.utc)
             except ValueError:
-                now = datetime.datetime.now(datetime.timezone.utc)
-                day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+                now_utc = datetime.datetime.now(datetime.timezone.utc)
+                local_now = now_utc - datetime.timedelta(minutes=timezone_offset)
+                local_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+                day_start = local_start + datetime.timedelta(minutes=timezone_offset)
+                day_start = day_start.replace(tzinfo=datetime.timezone.utc)
         else:
-            now = datetime.datetime.now(datetime.timezone.utc)
-            day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            now_utc = datetime.datetime.now(datetime.timezone.utc)
+            local_now = now_utc - datetime.timedelta(minutes=timezone_offset)
+            local_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_start = local_start + datetime.timedelta(minutes=timezone_offset)
+            day_start = day_start.replace(tzinfo=datetime.timezone.utc)
             
         day_end = day_start + datetime.timedelta(days=1)
         return day_start.isoformat(), day_end.isoformat(), day_start
@@ -50,23 +60,32 @@ class SupabaseService:
             return None
         return res.data[0]
 
-    def join_queue(self, shop_id, name, phone, service_type="General Inquiry"):
+    def join_queue(self, shop_id, name, phone, service_type="General Inquiry", timezone_offset=0):
         try:
             # Atomic operation using Supabase RPC database function
             res = self.client.rpc("join_shop_queue", {
                 "p_shop_id": shop_id,
                 "p_name": name,
                 "p_phone": phone,
-                "p_service_type": service_type
+                "p_service_type": service_type,
+                "p_timezone_offset": timezone_offset
             }).execute()
             if len(res.data) > 0:
                 return res.data[0]
         except Exception as e:
             # Fallback to direct Python select-then-insert
-            # Find next token number
+            # Calculate start of local day in UTC to limit daily sequence
+            now_utc = datetime.datetime.now(datetime.timezone.utc)
+            local_now = now_utc - datetime.timedelta(minutes=timezone_offset)
+            local_day_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            day_start_utc = local_day_start + datetime.timedelta(minutes=timezone_offset)
+            day_start_utc = day_start_utc.replace(tzinfo=datetime.timezone.utc)
+
+            # Find next token number since the start of the current local day in UTC
             res_max = self.client.table("queue") \
                 .select("token_number") \
                 .eq("shop_id", shop_id) \
+                .gte("time_joined", day_start_utc.isoformat()) \
                 .order("token_number", desc=True) \
                 .limit(1) \
                 .execute()
@@ -122,9 +141,9 @@ class SupabaseService:
         member["people_ahead"] = res_ahead.count if res_ahead.count is not None else 0
         return member
 
-    def get_active_queue(self, shop_id, target_date=None):
+    def get_active_queue(self, shop_id, target_date=None, timezone_offset=0):
         # Fetch active tokens (waiting and serving) for the target date
-        start_iso, end_iso, _ = self._get_date_range(target_date)
+        start_iso, end_iso, _ = self._get_date_range(target_date, timezone_offset)
         res = self.client.table("queue") \
             .select("*") \
             .eq("shop_id", shop_id) \
@@ -135,9 +154,9 @@ class SupabaseService:
             .execute()
         return res.data
 
-    def get_queue_history(self, shop_id, target_date=None):
+    def get_queue_history(self, shop_id, target_date=None, timezone_offset=0):
         # Fetch completed/skipped history for the target date
-        start_iso, end_iso, _ = self._get_date_range(target_date)
+        start_iso, end_iso, _ = self._get_date_range(target_date, timezone_offset)
         res = self.client.table("queue") \
             .select("*") \
             .eq("shop_id", shop_id) \
@@ -294,9 +313,9 @@ class SupabaseService:
             return None
         return res.data[0]
 
-    def get_dashboard_analytics(self, shop_id, target_date=None):
-        # Get start/end range of the selected target date
-        start_iso, end_iso, day_start = self._get_date_range(target_date)
+    def get_dashboard_analytics(self, shop_id, target_date=None, timezone_offset=0):
+        # Get start/end range of the selected target date in UTC
+        start_iso, end_iso, day_start = self._get_date_range(target_date, timezone_offset)
         
         # Total customers joined on this date
         res_total = self.client.table("queue") \
@@ -368,7 +387,12 @@ class SupabaseService:
             .execute()
         this_week_count = res_this_week.count if res_this_week.count is not None else 0
 
-        this_month_start = day_start.replace(day=1)
+        # Start of local month calculation (offset-aware)
+        local_date = day_start - datetime.timedelta(minutes=timezone_offset)
+        local_month_start = local_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        this_month_start = local_month_start + datetime.timedelta(minutes=timezone_offset)
+        this_month_start = this_month_start.replace(tzinfo=datetime.timezone.utc)
+
         res_this_month = self.client.table("queue") \
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
@@ -378,10 +402,13 @@ class SupabaseService:
             .execute()
         this_month_count = res_this_month.count if res_this_month.count is not None else 0
 
-        if this_month_start.month == 1:
-            last_month_start = this_month_start.replace(year=this_month_start.year - 1, month=12)
+        if local_month_start.month == 1:
+            local_last_month_start = local_month_start.replace(year=local_month_start.year - 1, month=12)
         else:
-            last_month_start = this_month_start.replace(month=this_month_start.month - 1)
+            local_last_month_start = local_month_start.replace(month=local_month_start.month - 1)
+        
+        last_month_start = local_last_month_start + datetime.timedelta(minutes=timezone_offset)
+        last_month_start = last_month_start.replace(tzinfo=datetime.timezone.utc)
         last_month_end = this_month_start
 
         res_last_month = self.client.table("queue") \
@@ -417,14 +444,17 @@ class SupabaseService:
         for row in res_seven_days.data:
             if row.get("time_completed"):
                 dt = datetime.datetime.fromisoformat(row["time_completed"].replace('Z', '+00:00'))
-                completed_dates.append(dt.date())
+                # Convert completion time to local time to bucket on the correct day
+                local_dt = dt - datetime.timedelta(minutes=timezone_offset)
+                completed_dates.append(local_dt.date())
 
         chart_data = []
         for i in range(6, -1, -1):
-            d = (day_start - datetime.timedelta(days=i)).date()
-            count = completed_dates.count(d)
+            d = (day_start - datetime.timedelta(days=i)) - datetime.timedelta(minutes=timezone_offset)
+            d_date = d.date()
+            count = completed_dates.count(d_date)
             chart_data.append({
-                "date": d.strftime("%a %b %d"),
+                "date": d_date.strftime("%a %b %d"),
                 "count": count
             })
 
@@ -442,9 +472,9 @@ class SupabaseService:
             "chart_data": chart_data
         }
 
-    def get_export_data(self, shop_id, target_date=None):
+    def get_export_data(self, shop_id, target_date=None, timezone_offset=0):
         # Fetch all customers for export on the target date
-        start_iso, end_iso, _ = self._get_date_range(target_date)
+        start_iso, end_iso, _ = self._get_date_range(target_date, timezone_offset)
         res = self.client.table("queue") \
             .select("name, phone, token_number, status, time_joined") \
             .eq("shop_id", shop_id) \

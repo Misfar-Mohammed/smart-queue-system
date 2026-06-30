@@ -47,7 +47,8 @@ CREATE OR REPLACE FUNCTION join_shop_queue(
     p_shop_id UUID, 
     p_name VARCHAR, 
     p_phone VARCHAR,
-    p_service_type VARCHAR DEFAULT 'General Inquiry'
+    p_service_type VARCHAR DEFAULT 'General Inquiry',
+    p_timezone_offset INTEGER DEFAULT 0
 )
 RETURNS TABLE (
     id UUID,
@@ -63,17 +64,22 @@ DECLARE
     next_token INTEGER;
     new_id UUID;
     new_time TIMESTAMP WITH TIME ZONE;
+    day_start TIMESTAMP WITH TIME ZONE;
 BEGIN
-    -- 1. Lock the queue rows of the shop to prevent parallel token overlaps
-    -- 2. Get the next incremented token number for this shop
+    new_time := CURRENT_TIMESTAMP;
+    
+    -- Calculate start of local day in UTC
+    -- p_timezone_offset is in minutes (e.g. -420 for UTC+7)
+    day_start := date_trunc('day', new_time - (p_timezone_offset * INTERVAL '1 minute')) + (p_timezone_offset * INTERVAL '1 minute');
+
+    -- Get next token number for this shop since start of today
     SELECT COALESCE(MAX(q.token_number), 0) + 1 INTO next_token
     FROM queue q
-    WHERE q.shop_id = p_shop_id;
+    WHERE q.shop_id = p_shop_id AND q.time_joined >= day_start;
 
     new_id := gen_random_uuid();
-    new_time := CURRENT_TIMESTAMP;
 
-    -- 3. Insert customer record into queue
+    -- Insert customer record into queue
     INSERT INTO queue (id, shop_id, name, phone, token_number, status, time_joined, service_type)
     VALUES (new_id, p_shop_id, p_name, p_phone, next_token, 'waiting', new_time, p_service_type);
 

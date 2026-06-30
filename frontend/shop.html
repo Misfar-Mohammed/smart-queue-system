@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -192,7 +192,7 @@
                 const response = await fetch(CONFIG.API_BASE_URL + "/shop/" + shopId + "/join", {
                     method: "POST",
                     headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({ name, phone, service_type: serviceType })
+                    body: JSON.stringify({ name, phone, service_type: serviceType, timezone_offset: new Date().getTimezoneOffset() })
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || "Failed to join queue");
