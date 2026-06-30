@@ -201,6 +201,75 @@ class SupabaseService:
             }
         return None
 
+    def finish_current(self, shop_id):
+        # Find current serving customer
+        res_curr = self.client.table("queue") \
+            .select("id, token_number") \
+            .eq("shop_id", shop_id) \
+            .eq("status", "serving") \
+            .limit(1) \
+            .execute()
+        
+        if len(res_curr.data) > 0:
+            completed_id = res_curr.data[0]["id"]
+            completed_token = res_curr.data[0]["token_number"]
+            now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            self.client.table("queue") \
+                .update({"status": "completed", "time_completed": now_iso}) \
+                .eq("id", completed_id) \
+                .execute()
+            return {
+                "completed_id": completed_id,
+                "completed_token": completed_token
+            }
+        return None
+
+    def skip_and_next(self, shop_id):
+        # Find current serving customer and mark as skipped
+        res_curr = self.client.table("queue") \
+            .select("id, token_number") \
+            .eq("shop_id", shop_id) \
+            .eq("status", "serving") \
+            .limit(1) \
+            .execute()
+        
+        skipped_id = None
+        skipped_token = None
+        if len(res_curr.data) > 0:
+            skipped_id = res_curr.data[0]["id"]
+            skipped_token = res_curr.data[0]["token_number"]
+            now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            self.client.table("queue") \
+                .update({"status": "skipped", "time_completed": now_iso}) \
+                .eq("id", skipped_id) \
+                .execute()
+        
+        # Now call/serve the next waiting customer
+        res_next = self.client.table("queue") \
+            .select("id", "token_number") \
+            .eq("shop_id", shop_id) \
+            .eq("status", "waiting") \
+            .order("token_number", desc=False) \
+            .limit(1) \
+            .execute()
+        
+        serving_id = None
+        serving_token = None
+        if len(res_next.data) > 0:
+            serving_id = res_next.data[0]["id"]
+            serving_token = res_next.data[0]["token_number"]
+            self.client.table("queue") \
+                .update({"status": "serving"}) \
+                .eq("id", serving_id) \
+                .execute()
+                
+        return {
+            "skipped_id": skipped_id,
+            "skipped_token": skipped_token,
+            "serving_id": serving_id,
+            "serving_token": serving_token
+        }
+
     def skip_customer(self, shop_id, queue_id):
         now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
         res = self.client.table("queue") \

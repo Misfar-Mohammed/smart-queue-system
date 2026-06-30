@@ -350,6 +350,42 @@ def call_next_customer(current_shop_id):
         "status": result
     }), 200
 
+@app.route("/api/shop/queue/finish", methods=["POST"])
+@token_required
+def finish_current_customer(current_shop_id):
+    result = get_db().finish_current(current_shop_id)
+    if not result:
+        return jsonify({"message": "No customer currently serving"}), 200
+    return jsonify({
+        "message": "Finished current customer successfully",
+        "status": result
+    }), 200
+
+@app.route("/api/shop/queue/skip-and-next", methods=["POST"])
+@token_required
+def skip_and_call_next(current_shop_id):
+    result = get_db().skip_and_next(current_shop_id)
+    if not result or (not result.get("skipped_id") and not result.get("serving_id")):
+        return jsonify({"message": "Queue is empty"}), 200
+        
+    # Simulate sending SMS/WhatsApp notification in the backend log
+    serving_id = result.get("serving_id")
+    if serving_id:
+        member = get_db().get_queue_member(serving_id)
+        if member:
+            print("\n" + "="*80)
+            print(f"[SMS/WhatsApp Notification Dispatcher]")
+            print(f"To: {member['phone']} ({member['name']})")
+            print(f"Message: Hi {member['name']}, your turn has arrived at {member['shop_name']}! "
+                  f"Your token number is #{member['token_number']}. Please proceed to the counter.")
+            print("="*80 + "\n")
+            sys.stdout.flush()
+
+    return jsonify({
+        "message": "Skipped current and called next customer successfully",
+        "status": result
+    }), 200
+
 @app.route("/api/shop/queue/skip/<token_id>", methods=["POST"])
 @token_required
 def skip_customer(current_shop_id, token_id):
