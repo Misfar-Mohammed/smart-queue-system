@@ -294,6 +294,14 @@ def submit_feedback(token_id):
 
 # ----------------- OWNER DASHBOARD ENDPOINTS (PROTECTED) -----------------
 
+@app.route("/api/shop/support", methods=["GET"])
+@token_required
+def get_support_contact(current_shop_id):
+    return jsonify({
+        "whatsapp_number": "+94 703759561",
+        "whatsapp_url": "https://wa.me/94703759561?text=Hello%20Support,%20I%20am%20a%20registered%20owner%20of%20a%20Q-System%20shop."
+    }), 200
+
 @app.route("/api/shop/dashboard-data", methods=["GET"])
 @token_required
 def get_dashboard_data(current_shop_id):

@@ -265,6 +265,16 @@ class SupabaseService:
             .execute()
         yesterday_count = res_yesterday.count if res_yesterday.count is not None else 0
 
+        # This Week calculation (starting from Monday of current week)
+        this_week_start = today_start - datetime.timedelta(days=today_start.weekday())
+        res_this_week = self.client.table("queue") \
+            .select("id", count="exact") \
+            .eq("shop_id", shop_id) \
+            .eq("status", "completed") \
+            .gte("time_completed", this_week_start.isoformat()) \
+            .execute()
+        this_week_count = res_this_week.count if res_this_week.count is not None else 0
+
         this_month_start = today_start.replace(day=1)
         res_this_month = self.client.table("queue") \
             .select("id", count="exact") \
@@ -329,6 +339,7 @@ class SupabaseService:
             "skipped_today": skipped_count,
             "avg_wait_time_minutes": avg_wait_time,
             "completed_yesterday": yesterday_count,
+            "completed_this_week": this_week_count,
             "completed_this_month": this_month_count,
             "completed_last_month": last_month_count,
             "avg_rating": avg_rating,
