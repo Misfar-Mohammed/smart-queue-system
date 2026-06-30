@@ -34,6 +34,14 @@
         .active-glow {
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
         }
+
+        button:disabled {
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
     </style>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -273,11 +281,11 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                         <!-- Button 1: Finish Current -->
                         <button id="btn-finish"
-                            class="flex-1 sm:flex-initial text-sm font-semibold bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="w-full sm:w-auto text-sm font-semibold bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                             </svg>
                             <span>Finish Current</span>
@@ -285,17 +293,18 @@
                         
                         <!-- Button 2: Finish & Call Next -->
                         <button id="btn-next"
-                            class="flex-1 sm:flex-initial text-sm font-bold bg-gradient-to-r from-indigo-500 to-violet-500 hover:opacity-95 text-white px-6 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.01] cursor-pointer">
-                            <span>Finish & Call Next</span>
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                            class="w-full sm:w-auto text-sm font-bold bg-gradient-to-r from-indigo-500 to-violet-500 hover:opacity-95 text-white px-6 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.01] cursor-pointer">
+                            <span>Call Next Ticket</span>
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </button>
 
                         <!-- Button 3: Skip & Call Next -->
                         <button id="btn-skip-next"
-                            class="flex-1 sm:flex-initial text-sm font-semibold bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="w-full sm:w-auto text-sm font-semibold bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/20 text-rose-400 px-5 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
                             <span>Skip & Call Next</span>
@@ -538,18 +547,52 @@
                 lastAnalyticsData = data.analytics;
                 renderAnalyticsChart();
 
-                // Update Currently Serving
+                // Update Currently Serving and Controls State
                 const servingCustomer = data.active_queue.find(q => q.status === 'serving');
                 const servingTokenElement = document.getElementById('current-serving-token');
+                
+                const btnFinish = document.getElementById('btn-finish');
+                const btnNext = document.getElementById('btn-next');
+                const btnSkipNext = document.getElementById('btn-skip-next');
 
                 if (servingCustomer) {
                     servingTokenElement.innerText = `#${servingCustomer.token_number} - ${servingCustomer.name}`;
+                    
+                    // Enable Finish Current & Skip
+                    if (btnFinish) btnFinish.disabled = false;
+                    if (btnSkipNext) btnSkipNext.disabled = false;
+                    
+                    // Set next button state to Finish & Call Next
+                    if (btnNext) {
+                        btnNext.innerHTML = `
+                            <span>Finish & Call Next</span>
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        `;
+                    }
+
                     if (previousServing !== servingCustomer.id) {
                         logAction(`Now serving ticket #${servingCustomer.token_number} (${servingCustomer.name})`);
                         previousServing = servingCustomer.id;
                     }
                 } else {
                     servingTokenElement.innerText = 'None';
+                    
+                    // Disable Finish Current & Skip
+                    if (btnFinish) btnFinish.disabled = true;
+                    if (btnSkipNext) btnSkipNext.disabled = true;
+                    
+                    // Set next button state to Call Next Ticket
+                    if (btnNext) {
+                        btnNext.innerHTML = `
+                            <span>Call Next Ticket</span>
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        `;
+                    }
                     previousServing = null;
                 }
 
