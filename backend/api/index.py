@@ -181,7 +181,9 @@ def get_current_user(current_shop_id):
         "id": shop["id"],
         "shop_name": shop["shop_name"],
         "owner_name": shop["owner_name"],
-        "phone": shop["phone"]
+        "phone": shop["phone"],
+        "is_open": shop.get("is_open", True),
+        "profile_photo": shop.get("profile_photo", None)
     }), 200
 
 # ----------------- SHOP PUBLIC ENDPOINTS -----------------
@@ -194,7 +196,9 @@ def get_shop_info(shop_id):
     return jsonify({
         "id": shop["id"],
         "shop_name": shop["shop_name"],
-        "owner_name": shop["owner_name"]
+        "owner_name": shop["owner_name"],
+        "is_open": shop.get("is_open", True),
+        "profile_photo": shop.get("profile_photo", None)
     }), 200
 
 @app.route("/api/shop/<shop_id>/qr", methods=["GET"])
@@ -248,16 +252,11 @@ def join_shop_queue(shop_id):
         return jsonify({"message": "Shop not found"}), 404
 
     data = request.get_json() or {}
-    name = data.get("name")
-    phone = data.get("phone")
+    name = (data.get("name") or "").strip() or "Anonymous"
+    phone = (data.get("phone") or "").strip() or "N/A"
     service_type = data.get("service_type", "General Inquiry")
     timezone_offset = data.get("timezone_offset", 0)
 
-    if not name or not phone:
-        return jsonify({"message": "Name and phone are required to join the queue"}), 400
-
-    name = name.strip()
-    phone = phone.strip()
     if service_type:
         service_type = service_type.strip()
         
@@ -302,6 +301,63 @@ def submit_feedback(token_id):
     }), 200
 
 # ----------------- OWNER DASHBOARD ENDPOINTS (PROTECTED) -----------------
+
+@app.route("/api/shop/update", methods=["POST"])
+@token_required
+def update_shop_profile(current_shop_id):
+    data = request.get_json() or {}
+    shop_name = data.get("shop_name")
+    owner_name = data.get("owner_name")
+    phone = data.get("phone")
+
+    if not all([shop_name, owner_name, phone]):
+        return jsonify({"message": "Missing required fields"}), 400
+
+    shop_name = shop_name.strip()
+    owner_name = owner_name.strip()
+    phone = phone.strip()
+
+    # Verify phone unique check (excluding this shop)
+    existing = get_db().get_shop_by_phone(phone)
+    if existing and existing["id"] != current_shop_id:
+        return jsonify({"message": "A shop with this phone number already exists"}), 409
+
+    updated_shop = get_db().update_shop(current_shop_id, shop_name, owner_name, phone)
+    if not updated_shop:
+        return jsonify({"message": "Failed to update shop details"}), 500
+
+    return jsonify({
+        "message": "Profile updated successfully",
+        "shop": {
+            "id": updated_shop["id"],
+            "shop_name": updated_shop["shop_name"],
+            "owner_name": updated_shop["owner_name"],
+            "phone": updated_shop["phone"]
+        }
+    }), 200
+
+@app.route("/api/shop/settings", methods=["POST"])
+@token_required
+def update_shop_settings(current_shop_id):
+    data = request.get_json() or {}
+    profile_photo = data.get("profile_photo")
+    is_open = data.get("is_open")
+
+    updated_shop = get_db().update_shop_settings(current_shop_id, profile_photo, is_open)
+    if not updated_shop:
+        return jsonify({"message": "Failed to update settings"}), 500
+
+    return jsonify({
+        "message": "Settings updated successfully",
+        "shop": {
+            "id": updated_shop["id"],
+            "shop_name": updated_shop["shop_name"],
+            "owner_name": updated_shop["owner_name"],
+            "phone": updated_shop["phone"],
+            "is_open": updated_shop.get("is_open", True),
+            "profile_photo": updated_shop.get("profile_photo", None)
+        }
+    }), 200
 
 @app.route("/api/shop/support", methods=["GET"])
 @token_required

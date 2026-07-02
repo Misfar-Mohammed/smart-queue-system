@@ -56,62 +56,46 @@
             </div>
 
             <div id="form-container" class="hidden">
-                <div class="text-center mb-8">
+                <div class="text-center mb-8 flex flex-col items-center justify-center">
+                    <!-- Shop Avatar Section -->
+                    <div id="shop-avatar-container" class="w-20 h-20 rounded-full border-2 border-indigo-500 bg-slate-900 flex items-center justify-center relative overflow-hidden mb-4 shadow-lg">
+                        <img id="shop-avatar-img" class="w-full h-full object-cover hidden" alt="Shop Avatar"/>
+                        <span id="shop-avatar-placeholder" class="text-xl font-bold font-outfit text-indigo-400 uppercase">-</span>
+                    </div>
                     <span class="text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full" style="color:#818cf8;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2);">You are joining:</span>
                     <h1 id="shop-name-title" class="font-outfit font-extrabold text-3xl mt-3 mb-1">Loading...</h1>
                     <p class="text-xs" style="color:rgba(255,255,255,0.45);">Fill in the fields to retrieve your queue ticket number.</p>
                 </div>
                 <form id="join-queue-form" class="space-y-5">
                     <div>
-                        <label for="name" class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(255,255,255,0.45);">Your Full Name</label>
+                        <label for="name" class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(255,255,255,0.45);">Your Name (Optional)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-4" style="color:rgba(255,255,255,0.35);">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                             </span>
-                            <input type="text" id="name" required placeholder="e.g. John Doe" class="glass-input rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium"/>
+                            <input type="text" id="name" placeholder="e.g. John Doe (Optional)" class="glass-input rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium"/>
                         </div>
                     </div>
                     <div>
-                        <label for="phone" class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(255,255,255,0.45);">Phone Number</label>
+                        <label for="phone" class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(255,255,255,0.45);">WhatsApp Number (Optional)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-4" style="color:rgba(255,255,255,0.35);">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                             </span>
-                            <input type="tel" id="phone" required placeholder="e.g. +1 234 567 890" class="glass-input rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium"/>
+                            <input type="tel" id="phone" placeholder="e.g. +1 234 567 890 (Optional)" class="glass-input rounded-xl pl-12 pr-4 py-3.5 text-sm font-medium"/>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider mb-3" style="color:rgba(255,255,255,0.45);">Service Needed</label>
-                        <div class="grid grid-cols-2 gap-3" id="service-cards-grid">
-                            <div data-value="General Inquiry" class="svc-card active">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(99,102,241,0.18);">
-                                    <svg class="w-5 h-5" style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <span class="text-xs font-semibold leading-tight">General Inquiry</span>
-                            </div>
-                            <div data-value="Customer Support" class="svc-card">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(168,85,247,0.12);">
-                                    <svg class="w-5 h-5" style="color:#c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                                </div>
-                                <span class="text-xs font-semibold leading-tight">Customer Support</span>
-                            </div>
-                            <div data-value="Billing &amp; Payments" class="svc-card">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(16,185,129,0.12);">
-                                    <svg class="w-5 h-5" style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <span class="text-xs font-semibold leading-tight">Billing &amp; Payments</span>
-                            </div>
-                            <div data-value="Technical Help" class="svc-card">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(251,113,133,0.12);">
-                                    <svg class="w-5 h-5" style="color:#fb7185;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                </div>
-                                <span class="text-xs font-semibold leading-tight">Technical Help</span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="service-type" value="General Inquiry"/>
-                    </div>
+                    <input type="hidden" id="service-type" value="General Inquiry"/>
                     <button type="submit" id="submit-btn" class="w-full font-bold py-4 rounded-xl text-white text-sm tracking-wide" style="background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);box-shadow:0 4px 24px rgba(99,102,241,0.35),inset 0 1px 0 rgba(255,255,255,0.25);transition:opacity 0.2s;">
                         Join Shop Queue
+                    </button>
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-white/5"></div>
+                        <span class="flex-shrink mx-4 text-[10px] text-slate-500 uppercase font-bold tracking-widest">Or</span>
+                        <div class="flex-grow border-t border-white/5"></div>
+                    </div>
+                    <button type="button" id="anonymous-btn" class="w-full font-semibold py-3.5 rounded-xl text-slate-300 text-xs border border-white/10 hover:bg-white/5 hover:text-white transition-all cursor-pointer">
+                        Get Token Only (Anonymous)
                     </button>
                 </form>
             </div>
@@ -137,18 +121,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const shopId = urlParams.get("id");
 
-        function initServiceCards() {
-            const cards = document.querySelectorAll(".svc-card");
-            const hiddenInput = document.getElementById("service-type");
-            cards.forEach(card => {
-                card.addEventListener("click", () => {
-                    cards.forEach(c => c.classList.remove("active"));
-                    card.classList.add("active");
-                    hiddenInput.value = card.getAttribute("data-value");
-                });
-            });
-        }
-        initServiceCards();
+
 
         const loader = document.getElementById("shop-loader");
         const formContainer = document.getElementById("form-container");
@@ -168,6 +141,35 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || "Could not connect to shop");
                 shopTitle.innerText = data.shop_name;
+                
+                // Show Shop profile image if available
+                const avatarImg = document.getElementById("shop-avatar-img");
+                const avatarPlaceholder = document.getElementById("shop-avatar-placeholder");
+                if (data.profile_photo) {
+                    if (avatarImg) {
+                        avatarImg.src = data.profile_photo;
+                        avatarImg.classList.remove("hidden");
+                    }
+                    if (avatarPlaceholder) avatarPlaceholder.classList.add("hidden");
+                } else {
+                    if (avatarImg) avatarImg.classList.add("hidden");
+                    if (avatarPlaceholder) {
+                        avatarPlaceholder.innerText = data.shop_name.charAt(0).toUpperCase();
+                        avatarPlaceholder.classList.remove("hidden");
+                    }
+                }
+                
+                // Check if shop is open
+                if (data.is_open === false) {
+                    loader.classList.add("hidden");
+                    formContainer.classList.add("hidden");
+                    errorContainer.classList.remove("hidden");
+                    errorMsg.innerText = "This shop is currently closed and not accepting queue tokens. Please check back later.";
+                    const errorTitle = errorContainer.querySelector("h3");
+                    if (errorTitle) errorTitle.innerText = "Shop is Closed";
+                    return;
+                }
+                
                 loader.classList.add("hidden");
                 formContainer.classList.remove("hidden");
             } catch (err) {
@@ -180,19 +182,42 @@
 
         const joinForm = document.getElementById("join-queue-form");
         const submitBtn = document.getElementById("submit-btn");
+        const anonymousBtn = document.getElementById("anonymous-btn");
+
+        if (anonymousBtn) {
+            anonymousBtn.addEventListener("click", () => {
+                document.getElementById("name").value = "";
+                document.getElementById("phone").value = "";
+                // Submit form directly
+                submitQueueForm();
+            });
+        }
+
         joinForm.addEventListener("submit", async (e) => {
             e.preventDefault();
+            submitQueueForm();
+        });
+
+        async function submitQueueForm() {
             const name = document.getElementById("name").value.trim();
             const phone = document.getElementById("phone").value.trim();
             const serviceType = document.getElementById("service-type").value;
-            if (!name || !phone) { Toast.show("Please fill in all fields", "error"); return; }
+            
             submitBtn.disabled = true;
             submitBtn.innerHTML = "<svg class='animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block' fill='none' viewBox='0 0 24 24'><circle class='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4'></circle><path class='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path></svg>Joining Queue...";
+            
+            if (anonymousBtn) anonymousBtn.disabled = true;
+            
             try {
                 const response = await fetch(CONFIG.API_BASE_URL + "/shop/" + shopId + "/join", {
                     method: "POST",
                     headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({ name, phone, service_type: serviceType, timezone_offset: new Date().getTimezoneOffset() })
+                    body: JSON.stringify({
+                        name: name || "Anonymous",
+                        phone: phone || "N/A",
+                        service_type: serviceType,
+                        timezone_offset: new Date().getTimezoneOffset()
+                    })
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || "Failed to join queue");
@@ -202,8 +227,9 @@
                 Toast.show(err.message, "error");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Join Shop Queue";
+                if (anonymousBtn) anonymousBtn.disabled = false;
             }
-        });
+        }
     </script>
 </body>
 </html>

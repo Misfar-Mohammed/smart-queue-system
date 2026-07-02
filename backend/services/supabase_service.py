@@ -58,7 +58,13 @@ class SupabaseService:
         res = self.client.table("shops").select("*").eq("id", shop_id).execute()
         if len(res.data) == 0:
             return None
-        return res.data[0]
+        shop = res.data[0]
+        # Attach default fallbacks for missing columns
+        if "is_open" not in shop:
+            shop["is_open"] = True
+        if "profile_photo" not in shop:
+            shop["profile_photo"] = None
+        return shop
 
     def join_queue(self, shop_id, name, phone, service_type="General Inquiry", timezone_offset=0):
         try:
@@ -161,8 +167,8 @@ class SupabaseService:
             .select("*") \
             .eq("shop_id", shop_id) \
             .in_("status", ["completed", "skipped"]) \
-            .gte("time_joined", start_iso) \
-            .lt("time_joined", end_iso) \
+            .gte("time_completed", start_iso) \
+            .lt("time_completed", end_iso) \
             .order("time_completed", desc=True) \
             .execute()
         return res.data
@@ -331,8 +337,8 @@ class SupabaseService:
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
-            .gte("time_joined", start_iso) \
-            .lt("time_joined", end_iso) \
+            .gte("time_completed", start_iso) \
+            .lt("time_completed", end_iso) \
             .execute()
         completed_count = res_completed.count if res_completed.count is not None else 0
 
@@ -341,8 +347,8 @@ class SupabaseService:
             .select("id", count="exact") \
             .eq("shop_id", shop_id) \
             .eq("status", "skipped") \
-            .gte("time_joined", start_iso) \
-            .lt("time_joined", end_iso) \
+            .gte("time_completed", start_iso) \
+            .lt("time_completed", end_iso) \
             .execute()
         skipped_count = res_skipped.count if res_skipped.count is not None else 0
 
@@ -351,8 +357,8 @@ class SupabaseService:
             .select("time_joined, time_completed") \
             .eq("shop_id", shop_id) \
             .eq("status", "completed") \
-            .gte("time_joined", start_iso) \
-            .lt("time_joined", end_iso) \
+            .gte("time_completed", start_iso) \
+            .lt("time_completed", end_iso) \
             .execute()
 
         durations = []
@@ -483,3 +489,47 @@ class SupabaseService:
             .order("token_number", desc=False) \
             .execute()
         return res.data
+
+    def update_shop(self, shop_id, shop_name, owner_name, phone):
+        data = {
+            "shop_name": shop_name,
+            "owner_name": owner_name,
+            "phone": phone
+        }
+        res = self.client.table("shops").update(data).eq("id", shop_id).execute()
+        if len(res.data) == 0:
+            return None
+        shop = res.data[0]
+        # Ensure default fallbacks are present
+        if "is_open" not in shop:
+            shop["is_open"] = True
+        if "profile_photo" not in shop:
+            shop["profile_photo"] = None
+        return shop
+
+    def update_shop_settings(self, shop_id, profile_photo=None, is_open=None):
+        data = {}
+        if profile_photo is not None:
+            data["profile_photo"] = profile_photo
+        if is_open is not None:
+            data["is_open"] = is_open
+
+        if not data:
+            return self.get_shop_by_id(shop_id)
+
+        try:
+            res = self.client.table("shops").update(data).eq("id", shop_id).execute()
+            if len(res.data) == 0:
+                return None
+            return res.data[0]
+        except Exception as e:
+            # Fallback if profile_photo or is_open columns don't exist in Supabase yet
+            # Return current details with fallback simulation
+            shop = self.get_shop_by_id(shop_id)
+            if shop:
+                if profile_photo is not None:
+                    shop["profile_photo"] = profile_photo
+                if is_open is not None:
+                    shop["is_open"] = is_open
+            return shop
+

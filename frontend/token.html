@@ -344,6 +344,15 @@
                     completedPanel.classList.remove('hidden');
                     skippedPanel.classList.add('hidden');
 
+                    // Play Voice Notification on Completion
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance("Thank you for your visit. Come again, and have a safe journey!");
+                        utterance.rate = 0.95;
+                        utterance.pitch = 1.0;
+                        window.speechSynthesis.speak(utterance);
+                    }
+
                     // Stop polling once completed
                     clearInterval(pollingInterval);
                 }

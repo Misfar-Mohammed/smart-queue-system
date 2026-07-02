@@ -288,6 +288,22 @@
         .light-theme ::-webkit-scrollbar-thumb {
             background: rgba(99,102,241,0.25);
         }
+        .service-needed-badge {
+            transition: all 0.3s ease;
+        }
+        .light-theme .service-needed-badge {
+            background-color: rgba(226, 232, 240, 0.8) !important;
+            color: #334155 !important;
+            border-color: rgba(203, 213, 225, 0.8) !important;
+        }
+        .active-service-tag {
+            transition: all 0.3s ease;
+        }
+        .light-theme .active-service-tag {
+            background-color: rgba(139, 92, 246, 0.12) !important;
+            color: #6d28d9 !important;
+            border-color: rgba(139, 92, 246, 0.25) !important;
+        }
     </style>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -337,6 +353,13 @@
                     </svg>
                 </button>
 
+                <!-- 3-Dot Options Button -->
+                <button id="btn-more-options" class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" title="Settings & More">
+                    <svg class="w-5 h-5" style="color:var(--text-secondary);" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </button>
+
                 <button onclick="Auth.logout()" class="glass-btn text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -357,10 +380,15 @@
 
             <!-- Welcome greeting and global actions -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 class="font-outfit font-bold text-3xl text-white">Hello, <span id="owner-name"
-                            class="text-indigo-400">Owner</span></h1>
-                    <p class="text-slate-400 text-sm mt-1">Manage, audit, and analyze your queue positions.</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full border border-slate-800 bg-slate-900 flex items-center justify-center relative overflow-hidden shadow-md" id="dashboard-avatar-container">
+                        <img id="dashboard-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar"/>
+                        <span id="dashboard-avatar-placeholder" class="text-lg font-bold font-outfit text-indigo-400 uppercase">O</span>
+                    </div>
+                    <div>
+                        <h1 class="font-outfit font-bold text-3xl text-white">Hello, <span id="owner-name" class="text-indigo-400">Owner</span></h1>
+                        <p class="text-slate-400 text-sm mt-1">Manage, audit, and analyze your queue positions.</p>
+                    </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <!-- Date Picker -->
@@ -486,28 +514,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                         </svg>
                     </div>
-                </div>
-            </div>
-
-            <!-- TRAFFIC & COMPARISON ANALYTICS PANEL -->
-            <div class="glass-panel rounded-2xl p-6 border border-slate-800">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h3 id="chart-title" class="font-outfit font-bold text-xl text-white">Weekly Traffic Analytics</h3>
-                        <p id="chart-subtitle" class="text-slate-400 text-xs mt-0.5">Completed customer counts over the past 7 days.</p>
-                    </div>
-                    <!-- Tab Buttons -->
-                    <div class="flex items-center bg-slate-900 border border-slate-800 p-1 rounded-xl w-fit">
-                        <button id="tab-weekly" class="text-xs font-semibold text-white bg-indigo-600 px-3.5 py-2 rounded-lg transition-all cursor-pointer">
-                            Weekly
-                        </button>
-                        <button id="tab-comparison" class="text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-2 rounded-lg transition-all cursor-pointer">
-                            Comparison
-                        </button>
-                    </div>
-                </div>
-                <div class="relative w-full h-[220px]">
-                    <canvas id="trafficChart"></canvas>
                 </div>
             </div>
 
@@ -705,6 +711,160 @@
         </section>
 
     </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <!-- Backdrop -->
+        <div id="settings-modal-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"></div>
+        <!-- Modal Container -->
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl relative overflow-hidden z-10 flex flex-col max-h-[85vh]">
+            <div class="absolute top-0 left-0 w-full h-[2.5px] bg-gradient-to-r from-violet-500 to-indigo-500"></div>
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-6">
+                <div>
+                    <h3 class="font-outfit font-bold text-2xl text-white">Settings & Options</h3>
+                    <p class="text-xs text-slate-400 mt-1">Configure profile details, view traffic analytics, and change custom settings.</p>
+                </div>
+                <button id="btn-close-settings" class="glass-btn w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer text-slate-400 hover:text-white" title="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Body (Scrollable) -->
+            <div class="flex-1 overflow-y-auto space-y-6 pr-1">
+                
+                <!-- Tabs -->
+                <div class="flex border-b border-slate-800/50 pb-px gap-6 mb-2">
+                    <button id="modal-tab-profile" class="modal-tab-btn active text-sm font-semibold pb-3 text-indigo-400 border-b-2 border-indigo-500 cursor-pointer">
+                        Edit Profile
+                    </button>
+                    <button id="modal-tab-analytics" class="modal-tab-btn text-sm font-semibold pb-3 text-slate-400 hover:text-white cursor-pointer">
+                        Traffic Analytics
+                    </button>
+                    <button id="modal-tab-features" class="modal-tab-btn text-sm font-semibold pb-3 text-slate-400 hover:text-white cursor-pointer">
+                        Extra Features
+                    </button>
+                </div>
+
+                <!-- Tab contents -->
+                <div id="modal-content-profile" class="modal-tab-content space-y-6">
+                    <form id="edit-profile-form" class="space-y-5">
+                        <div class="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-slate-800/30">
+                            <!-- Avatar Preview -->
+                            <div class="relative group">
+                                <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-indigo-500 bg-slate-900 flex items-center justify-center relative shadow-lg">
+                                    <img id="profile-preview" src="" class="w-full h-full object-cover hidden" alt="Avatar"/>
+                                    <div id="profile-placeholder" class="text-xl font-bold font-outfit text-indigo-400 uppercase">O</div>
+                                </div>
+                                <label for="profile-photo-input" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </label>
+                                <input type="file" id="profile-photo-input" accept="image/*" class="hidden" />
+                            </div>
+                            <div class="text-center sm:text-left space-y-1">
+                                <h4 class="text-xs font-semibold text-white">Shop Logo / Profile Photo</h4>
+                                <p class="text-[10px] text-slate-400">Click avatar preview to upload new JPG/PNG file.</p>
+                                <button type="button" id="btn-remove-avatar" class="text-[9px] text-rose-450 hover:text-rose-400 font-bold block pt-1 cursor-pointer">Remove Image</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="edit-owner-name" class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Owner Name</label>
+                                <input type="text" id="edit-owner-name" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white" placeholder="Owner Name" required />
+                            </div>
+                            <div>
+                                <label for="edit-shop-name" class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Shop Name</label>
+                                <input type="text" id="edit-shop-name" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white" placeholder="Shop Name" required />
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label for="edit-phone" class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Phone Number / WhatsApp</label>
+                                <input type="tel" id="edit-phone" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white" placeholder="Phone Number" required />
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-800/40">
+                            <button type="submit" id="btn-save-profile" class="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-3 rounded-xl transition-all cursor-pointer">
+                                Save Profile Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab content: Analytics (Moved here) -->
+                <div id="modal-content-analytics" class="modal-tab-content hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                        <div>
+                            <h3 id="chart-title" class="font-outfit font-bold text-lg text-white">Weekly Traffic Analytics</h3>
+                            <p id="chart-subtitle" class="text-slate-400 text-xs mt-0.5">Completed customer counts over the past 7 days.</p>
+                        </div>
+                        <!-- Tab Buttons -->
+                        <div class="flex items-center bg-slate-900 border border-slate-800 p-1 rounded-xl w-fit">
+                            <button id="modal-tab-weekly" class="text-xs font-semibold text-white bg-indigo-600 px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                                Weekly
+                            </button>
+                            <button id="modal-tab-comparison" class="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                                Comparison
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[240px] bg-slate-900/30 rounded-2xl p-4 border border-slate-850">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tab content: Extra Features -->
+                <div id="modal-content-features" class="modal-tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Shop Status (Open/Closed) Toggle -->
+                        <div class="glass-panel p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400" id="shop-status-dot"></span>
+                                    Shop Status Control
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Open or close registration. Closed shops block new queue tickets.</p>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <span class="text-xs font-semibold text-white" id="shop-status-text">Shop is OPEN</span>
+                                <button id="btn-toggle-shop-status" class="text-xs font-bold px-4 py-2 rounded-xl transition-all border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 cursor-pointer">
+                                    Close Shop
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Voice Sound Customization Settings -->
+                        <div class="glass-panel p-5 rounded-2xl border border-slate-850 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                                    </svg>
+                                    Departure Announcement
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Change voice speed rate or test your announcements.</p>
+                            </div>
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Voice Rate (Speed):</span>
+                                    <input type="range" id="voice-rate-slider" min="0.5" max="1.5" step="0.1" value="0.95" class="w-24 accent-indigo-500" />
+                                </div>
+                                <button id="btn-test-voice" class="w-full text-[10px] font-bold px-3 py-2 rounded-xl border border-slate-800 hover:bg-white/5 text-slate-355 transition-all cursor-pointer">
+                                    🔊 Test Voice Announcement
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 py-8 text-center text-slate-500 text-xs mt-16">
@@ -904,7 +1064,7 @@
                     <tr class="hover:bg-slate-900/30 transition-colors">
                         <td class="p-4 font-outfit font-extrabold text-base text-indigo-400">#${item.token_number}</td>
                         <td class="p-4 font-semibold text-white">${item.name}</td>
-                        <td class="p-4"><span class="text-xs font-semibold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">${item.service_type || 'General Inquiry'}</span></td>
+                        <td class="p-4"><span class="active-service-tag text-xs font-semibold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">${item.service_type || 'General Inquiry'}</span></td>
                         <td class="p-4 text-xs font-mono text-slate-500">${item.phone}</td>
                         <td class="p-4">${statusBadge}</td>
                         <td class="p-4 text-center flex items-center justify-center">${whatsappButton} ${actionButton}</td>
@@ -942,13 +1102,25 @@
                     <tr class="hover:bg-slate-900/10 text-slate-400">
                         <td class="p-4 font-outfit font-extrabold text-sm text-slate-500">#${item.token_number}</td>
                         <td class="p-4 font-medium text-slate-300">${item.name}</td>
-                        <td class="p-4"><span class="text-[11px] font-semibold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/50">${item.service_type || 'General Inquiry'}</span></td>
+                        <td class="p-4"><span class="service-needed-badge text-[11px] font-semibold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/50">${item.service_type || 'General Inquiry'}</span></td>
                         <td class="p-4">${outcomeBadge}</td>
                         <td class="p-4 text-center">${ratingStars}</td>
                         <td class="p-4 text-xs text-slate-500">${formatTime(item.time_completed)}</td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // Helper: Play Voice announcement when customer finishes
+        function playCompletionVoice() {
+            if ('speechSynthesis' in window) {
+                // Cancel any running speech to output this immediately
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance("Thank you for your visit. Come again, and have a safe journey!");
+                utterance.rate = parseFloat(localStorage.getItem('voice_announcement_rate') || '0.95');
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         // Action: Finish Current Customer (without calling next)
@@ -963,6 +1135,7 @@
                 if (result.status && result.status.completed_token) {
                     Toast.show(`Ticket #${result.status.completed_token} marked as completed.`, 'success');
                     logAction(`Ticket #${result.status.completed_token} completed`);
+                    playCompletionVoice();
                 } else {
                     Toast.show('No customer is currently being served.', 'info');
                 }
@@ -990,6 +1163,7 @@
                     if (result.status.completed_token) {
                         Toast.show(`Ticket #${result.status.completed_token} finished, #${result.status.serving_token} called!`, 'success');
                         logAction(`Ticket #${result.status.completed_token} completed`);
+                        playCompletionVoice();
                     } else {
                         Toast.show(`Ticket #${result.status.serving_token} called!`, 'success');
                     }
@@ -998,6 +1172,7 @@
                     if (result.status && result.status.completed_token) {
                         Toast.show(`Ticket #${result.status.completed_token} finished. Queue is now empty.`, 'success');
                         logAction(`Ticket #${result.status.completed_token} completed`);
+                        playCompletionVoice();
                     } else {
                         Toast.show('Queue is empty. No more customers waiting.', 'info');
                     }
@@ -1186,8 +1361,8 @@
 
         // Tab switching events for analytics chart
         function initChartTabs() {
-            const tabWeekly = document.getElementById('tab-weekly');
-            const tabComparison = document.getElementById('tab-comparison');
+            const tabWeekly = document.getElementById('modal-tab-weekly');
+            const tabComparison = document.getElementById('modal-tab-comparison');
             if (!tabWeekly || !tabComparison) return;
 
             tabWeekly.addEventListener('click', () => {
@@ -1195,8 +1370,8 @@
                 activeChartTab = 'weekly';
                 
                 // Toggle active styles
-                tabWeekly.className = 'text-xs font-semibold text-white bg-indigo-600 px-3.5 py-2 rounded-lg transition-all cursor-pointer';
-                tabComparison.className = 'text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-2 rounded-lg transition-all cursor-pointer';
+                tabWeekly.className = 'text-xs font-semibold text-white bg-indigo-600 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer';
+                tabComparison.className = 'text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg transition-all cursor-pointer';
                 
                 renderAnalyticsChart();
             });
@@ -1206,8 +1381,8 @@
                 activeChartTab = 'comparison';
                 
                 // Toggle active styles
-                tabComparison.className = 'text-xs font-semibold text-white bg-indigo-600 px-3.5 py-2 rounded-lg transition-all cursor-pointer';
-                tabWeekly.className = 'text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-2 rounded-lg transition-all cursor-pointer';
+                tabComparison.className = 'text-xs font-semibold text-white bg-indigo-600 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer';
+                tabWeekly.className = 'text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg transition-all cursor-pointer';
                 
                 renderAnalyticsChart();
             });
@@ -1340,6 +1515,30 @@
         }
 
         let pollingTimer = null;
+        let isFetching = false;
+
+        async function pollDashboardData() {
+            if (isFetching) return;
+
+            const datePicker = document.getElementById('dashboard-date-picker');
+            const todayLocal = new Date().toLocaleDateString('en-CA');
+            if (datePicker && datePicker.value !== todayLocal) {
+                stopPolling();
+                return;
+            }
+
+            isFetching = true;
+            try {
+                await fetchDashboardData();
+            } catch (err) {
+                console.error("Poll error:", err);
+            } finally {
+                isFetching = false;
+                if (datePicker && datePicker.value === todayLocal) {
+                    pollingTimer = setTimeout(pollDashboardData, 1000);
+                }
+            }
+        }
 
         function startPolling() {
             stopPolling();
@@ -1347,12 +1546,12 @@
             const todayLocal = new Date().toLocaleDateString('en-CA');
             if (datePicker && datePicker.value !== todayLocal) return;
 
-            pollingTimer = setInterval(fetchDashboardData, 3000);
+            pollingTimer = setTimeout(pollDashboardData, 1000);
         }
 
         function stopPolling() {
             if (pollingTimer) {
-                clearInterval(pollingTimer);
+                clearTimeout(pollingTimer);
                 pollingTimer = null;
             }
         }
@@ -1418,12 +1617,332 @@
             });
         }
 
+        // More Options / Settings Modal Initialization
+        function initSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            const backdrop = document.getElementById('settings-modal-backdrop');
+            const btnOpen = document.getElementById('btn-more-options');
+            const btnClose = document.getElementById('btn-close-settings');
+            
+            if (!modal || !btnOpen || !btnClose) return;
+
+            btnOpen.addEventListener('click', () => {
+                const shop = Auth.getShop();
+                if (shop) {
+                    document.getElementById('edit-owner-name').value = shop.owner_name || '';
+                    document.getElementById('edit-shop-name').value = shop.shop_name || '';
+                    document.getElementById('edit-phone').value = shop.phone || '';
+                    
+                    updateAvatarPreviews(shop.profile_photo);
+                    updateShopStatusUI(shop.is_open);
+                }
+                
+                switchSettingsTab('profile');
+                modal.classList.remove('hidden');
+            });
+
+            const closeModal = () => {
+                modal.classList.add('hidden');
+            };
+
+            btnClose.addEventListener('click', closeModal);
+            backdrop.addEventListener('click', closeModal);
+            
+            // Tab switching logic inside modal
+            const tabs = ['profile', 'analytics', 'features'];
+            tabs.forEach(tabId => {
+                const btn = document.getElementById(`modal-tab-${tabId}`);
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        switchSettingsTab(tabId);
+                    });
+                }
+            });
+            
+            // Form submission logic
+            const profileForm = document.getElementById('edit-profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const owner_name = document.getElementById('edit-owner-name').value.trim();
+                    const shop_name = document.getElementById('edit-shop-name').value.trim();
+                    const phone = document.getElementById('edit-phone').value.trim();
+                    
+                    const submitBtn = document.getElementById('btn-save-profile');
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = 'Saving Changes...';
+                    
+                    try {
+                        const token = Auth.getToken();
+                        const response = await fetch(CONFIG.API_BASE_URL + '/shop/update', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ owner_name, shop_name, phone })
+                        });
+                        
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message || 'Failed to update profile');
+                        
+                        // Update cache
+                        const shop = Auth.getShop() || {};
+                        shop.owner_name = owner_name;
+                        shop.shop_name = shop_name;
+                        shop.phone = phone;
+                        Auth.setShop(shop);
+                        
+                        // Update UI names
+                        const ownerNameEl = document.getElementById('owner-name');
+                        if (ownerNameEl) ownerNameEl.innerText = owner_name;
+                        const brandEl = document.getElementById('shop-name-brand');
+                        if (brandEl) brandEl.innerText = shop_name;
+                        
+                        // Update avatar placeholder text letter
+                        const headerPlaceholder = document.getElementById('dashboard-avatar-placeholder');
+                        if (headerPlaceholder) headerPlaceholder.innerText = owner_name.charAt(0).toUpperCase();
+                        const modalPlaceholder = document.getElementById('profile-placeholder');
+                        if (modalPlaceholder) modalPlaceholder.innerText = owner_name.charAt(0).toUpperCase();
+                        
+                        Toast.show('Profile updated successfully!', 'success');
+                    } catch (err) {
+                        Toast.show(err.message, 'error');
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = 'Save Profile Changes';
+                    }
+                });
+            }
+            
+            // Profile photo input change logic
+            const photoInput = document.getElementById('profile-photo-input');
+            const removeAvatarBtn = document.getElementById('btn-remove-avatar');
+            
+            if (photoInput) {
+                photoInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    if (file.size > 2 * 1024 * 1024) {
+                        Toast.show('Image size must be less than 2MB', 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        const base64Data = event.target.result;
+                        await saveShopSettings({ profile_photo: base64Data });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            if (removeAvatarBtn) {
+                removeAvatarBtn.addEventListener('click', async () => {
+                    await saveShopSettings({ profile_photo: "" });
+                });
+            }
+
+            // Shop status control logic
+            const toggleStatusBtn = document.getElementById('btn-toggle-shop-status');
+            if (toggleStatusBtn) {
+                toggleStatusBtn.addEventListener('click', async () => {
+                    const shop = Auth.getShop() || {};
+                    const currentStatus = shop.is_open !== false; // defaults to true
+                    await saveShopSettings({ is_open: !currentStatus });
+                });
+            }
+
+            // Voice settings rate slider
+            const voiceRateSlider = document.getElementById('voice-rate-slider');
+            const testVoiceBtn = document.getElementById('btn-test-voice');
+            
+            // Load voice rate preference
+            const savedRate = localStorage.getItem('voice_announcement_rate') || '0.95';
+            if (voiceRateSlider) {
+                voiceRateSlider.value = savedRate;
+                voiceRateSlider.addEventListener('input', (e) => {
+                    localStorage.setItem('voice_announcement_rate', e.target.value);
+                });
+            }
+            
+            if (testVoiceBtn) {
+                testVoiceBtn.addEventListener('click', () => {
+                    const testMessage = "Thank you for your visit. Come again, and have a safe journey!";
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                        const utterance = new SpeechSynthesisUtterance(testMessage);
+                        utterance.rate = parseFloat(localStorage.getItem('voice_announcement_rate') || '0.95');
+                        window.speechSynthesis.speak(utterance);
+                        Toast.show('Testing voice announcement...', 'success');
+                    } else {
+                        Toast.show('Speech synthesis not supported in this browser', 'error');
+                    }
+                });
+            }
+        }
+        
+        function switchSettingsTab(tabId) {
+            // Hide all tab content
+            const contents = document.querySelectorAll('.modal-tab-content');
+            contents.forEach(c => c.classList.add('hidden'));
+            
+            // Remove active style from all tab buttons
+            const buttons = document.querySelectorAll('.modal-tab-btn');
+            buttons.forEach(b => {
+                b.className = 'modal-tab-btn text-sm font-semibold pb-3 text-slate-400 hover:text-white cursor-pointer';
+            });
+            
+            // Show selected tab content
+            const activeContent = document.getElementById(`modal-content-${tabId}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+            
+            // Set active styles on active button
+            const activeBtn = document.getElementById(`modal-tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = 'modal-tab-btn text-sm font-semibold pb-3 text-indigo-400 border-b-2 border-indigo-500 cursor-pointer';
+            }
+            
+            // Re-render chart if switching to analytics
+            if (tabId === 'analytics') {
+                setTimeout(renderAnalyticsChart, 50); // slight timeout to allow UI rendering layout
+            }
+        }
+
+        async function saveShopSettings(settingsObj) {
+            try {
+                const token = Auth.getToken();
+                const response = await fetch(CONFIG.API_BASE_URL + '/shop/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(settingsObj)
+                });
+                
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to update settings');
+                
+                // Update local storage
+                const shop = Auth.getShop() || {};
+                Object.assign(shop, result.shop);
+                Auth.setShop(shop);
+                
+                // Update UI based on updated fields
+                if (settingsObj.profile_photo !== undefined) {
+                    updateAvatarPreviews(result.shop.profile_photo);
+                    Toast.show('Logo updated successfully!', 'success');
+                }
+                
+                if (settingsObj.is_open !== undefined) {
+                    updateShopStatusUI(result.shop.is_open);
+                    const statusName = result.shop.is_open ? 'Opened' : 'Closed';
+                    Toast.show(`Shop is now ${statusName}!`, 'success');
+                }
+            } catch (err) {
+                Toast.show(err.message, 'error');
+            }
+        }
+
+        function updateAvatarPreviews(profilePhotoBase64) {
+            const dashboardImg = document.getElementById('dashboard-avatar-img');
+            const dashboardPlaceholder = document.getElementById('dashboard-avatar-placeholder');
+            const modalImg = document.getElementById('profile-preview');
+            const modalPlaceholder = document.getElementById('profile-placeholder');
+            
+            if (profilePhotoBase64) {
+                if (dashboardImg) {
+                    dashboardImg.src = profilePhotoBase64;
+                    dashboardImg.classList.remove('hidden');
+                }
+                if (dashboardPlaceholder) dashboardPlaceholder.classList.add('hidden');
+                
+                if (modalImg) {
+                    modalImg.src = profilePhotoBase64;
+                    modalImg.classList.remove('hidden');
+                }
+                if (modalPlaceholder) modalPlaceholder.classList.add('hidden');
+            } else {
+                if (dashboardImg) {
+                    dashboardImg.src = "";
+                    dashboardImg.classList.add('hidden');
+                }
+                if (dashboardPlaceholder) dashboardPlaceholder.classList.remove('hidden');
+                
+                if (modalImg) {
+                    modalImg.src = "";
+                    modalImg.classList.add('hidden');
+                }
+                if (modalPlaceholder) modalPlaceholder.classList.remove('hidden');
+            }
+        }
+
+        function updateShopStatusUI(isOpen) {
+            const statusDot = document.getElementById('shop-status-dot');
+            const statusText = document.getElementById('shop-status-text');
+            const toggleBtn = document.getElementById('btn-toggle-shop-status');
+            
+            isOpen = isOpen !== false; // defaults to true
+            
+            if (isOpen) {
+                if (statusDot) {
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+                }
+                if (statusText) statusText.innerText = 'Shop is OPEN';
+                if (toggleBtn) {
+                    toggleBtn.innerText = 'Close Shop';
+                    toggleBtn.className = 'text-xs font-bold px-4 py-2 rounded-xl transition-all border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer';
+                }
+            } else {
+                if (statusDot) {
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse';
+                }
+                if (statusText) statusText.innerText = 'Shop is CLOSED';
+                if (toggleBtn) {
+                    toggleBtn.innerText = 'Open Shop';
+                    toggleBtn.className = 'text-xs font-bold px-4 py-2 rounded-xl transition-all border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 cursor-pointer';
+                }
+            }
+        }
+
+        async function refreshShopProfile() {
+            try {
+                const token = Auth.getToken();
+                if (!token) return;
+                const response = await fetch(CONFIG.API_BASE_URL + '/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    Auth.setShop(data);
+                    
+                    // Update header & modal previews
+                    document.getElementById('shop-name-brand').innerText = data.shop_name || 'Dashboard';
+                    document.getElementById('owner-name').innerText = data.owner_name || 'Owner';
+                    updateAvatarPreviews(data.profile_photo);
+                    
+                    const initialLetter = (data.owner_name || 'O').charAt(0).toUpperCase();
+                    const dashPlaceholder = document.getElementById('dashboard-avatar-placeholder');
+                    if (dashPlaceholder) dashPlaceholder.innerText = initialLetter;
+                    const modalPlaceholder = document.getElementById('profile-placeholder');
+                    if (modalPlaceholder) modalPlaceholder.innerText = initialLetter;
+                }
+            } catch (err) {
+                console.error("Failed to refresh shop profile:", err);
+            }
+        }
+
         // Run on load
         initTheme();
         initQrDisplay();
         initSupportDisplay();
         initChartTabs();
         initDatePicker();
+        initSettingsModal();
+        refreshShopProfile();
         fetchDashboardData();
         startPolling();
 
