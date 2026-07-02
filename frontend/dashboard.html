@@ -595,7 +595,6 @@
                             <tr>
                                 <th class="p-4 rounded-tl-xl">Token</th>
                                 <th class="p-4">Customer Name</th>
-                                <th class="p-4">Service Needed</th>
                                 <th class="p-4">Phone</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4 text-center rounded-tr-xl">Actions</th>
@@ -604,7 +603,7 @@
                         <tbody id="queue-table-body" class="divide-y divide-slate-900/50">
                             <!-- Populated dynamically -->
                             <tr>
-                                <td colspan="6" class="p-8 text-center text-slate-500 text-sm">
+                                <td colspan="5" class="p-8 text-center text-slate-500 text-sm">
                                     Loading live queue data...
                                 </td>
                             </tr>
@@ -623,7 +622,6 @@
                             <tr>
                                 <th class="p-4 rounded-tl-xl">Token</th>
                                 <th class="p-4">Customer</th>
-                                <th class="p-4">Service Needed</th>
                                 <th class="p-4">Outcome</th>
                                 <th class="p-4 text-center">Rating</th>
                                 <th class="p-4 rounded-tr-xl">Finished At</th>
@@ -632,7 +630,7 @@
                         <tbody id="history-table-body" class="divide-y divide-slate-900/30">
                             <!-- Populated dynamically -->
                             <tr>
-                                <td colspan="6" class="p-6 text-center text-slate-500 text-sm">
+                                <td colspan="5" class="p-6 text-center text-slate-500 text-sm">
                                     No completed logs yet.
                                 </td>
                             </tr>
@@ -1064,7 +1062,6 @@
                     <tr class="hover:bg-slate-900/30 transition-colors">
                         <td class="p-4 font-outfit font-extrabold text-base text-indigo-400">#${item.token_number}</td>
                         <td class="p-4 font-semibold text-white">${item.name}</td>
-                        <td class="p-4"><span class="active-service-tag text-xs font-semibold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">${item.service_type || 'General Inquiry'}</span></td>
                         <td class="p-4 text-xs font-mono text-slate-500">${item.phone}</td>
                         <td class="p-4">${statusBadge}</td>
                         <td class="p-4 text-center flex items-center justify-center">${whatsappButton} ${actionButton}</td>
@@ -1079,7 +1076,7 @@
             if (!history || history.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="p-6 text-center text-slate-500 text-sm">No processed logs yet.</td>
+                        <td colspan="5" class="p-6 text-center text-slate-500 text-sm">No processed logs yet.</td>
                     </tr>
                 `;
                 return;
@@ -1102,7 +1099,6 @@
                     <tr class="hover:bg-slate-900/10 text-slate-400">
                         <td class="p-4 font-outfit font-extrabold text-sm text-slate-500">#${item.token_number}</td>
                         <td class="p-4 font-medium text-slate-300">${item.name}</td>
-                        <td class="p-4"><span class="service-needed-badge text-[11px] font-semibold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/50">${item.service_type || 'General Inquiry'}</span></td>
                         <td class="p-4">${outcomeBadge}</td>
                         <td class="p-4 text-center">${ratingStars}</td>
                         <td class="p-4 text-xs text-slate-500">${formatTime(item.time_completed)}</td>

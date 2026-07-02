@@ -131,7 +131,9 @@ def register():
             "id": new_shop["id"],
             "shop_name": new_shop["shop_name"],
             "owner_name": new_shop["owner_name"],
-            "phone": new_shop["phone"]
+            "phone": new_shop["phone"],
+            "is_open": new_shop.get("is_open", True),
+            "profile_photo": new_shop.get("profile_photo", None)
         }
     }), 201
 
@@ -166,7 +168,9 @@ def login():
             "id": shop["id"],
             "shop_name": shop["shop_name"],
             "owner_name": shop["owner_name"],
-            "phone": shop["phone"]
+            "phone": shop["phone"],
+            "is_open": shop.get("is_open", True),
+            "profile_photo": shop.get("profile_photo", None)
         }
     }), 200
 

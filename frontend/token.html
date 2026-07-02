@@ -285,20 +285,22 @@
             fetchTicketDetails(true);
 
             // Poll for changes every 2.5 seconds
-            const pollingInterval = setInterval(fetchTicketDetails, 2500);
+            let pollingInterval = setInterval(fetchTicketDetails, 2500);
 
             // Clean up interval if page is hidden
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     clearInterval(pollingInterval);
                 } else {
+                    clearInterval(pollingInterval);
                     fetchTicketDetails(false);
-                    setInterval(fetchTicketDetails, 2500);
+                    pollingInterval = setInterval(fetchTicketDetails, 2500);
                 }
             });
         }
 
         let isNotificationAlerted = false;
+        let isCompletionAlerted = false;
 
         async function fetchTicketDetails(isInitial = false) {
             try {
@@ -345,12 +347,15 @@
                     skippedPanel.classList.add('hidden');
 
                     // Play Voice Notification on Completion
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                        const utterance = new SpeechSynthesisUtterance("Thank you for your visit. Come again, and have a safe journey!");
-                        utterance.rate = 0.95;
-                        utterance.pitch = 1.0;
-                        window.speechSynthesis.speak(utterance);
+                    if (!isCompletionAlerted) {
+                        if ('speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const utterance = new SpeechSynthesisUtterance("Thank you for your visit. Come again, and have a safe journey!");
+                            utterance.rate = 0.95;
+                            utterance.pitch = 1.0;
+                            window.speechSynthesis.speak(utterance);
+                        }
+                        isCompletionAlerted = true;
                     }
 
                     // Stop polling once completed

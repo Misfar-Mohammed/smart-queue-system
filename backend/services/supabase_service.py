@@ -52,19 +52,89 @@ class SupabaseService:
         res = self.client.table("shops").select("*").eq("phone", phone).execute()
         if len(res.data) == 0:
             return None
-        return res.data[0]
+        shop = res.data[0]
+        # Attach settings KV defaults
+        settings = self.get_shop_settings(shop["id"])
+        shop["is_open"] = settings["is_open"]
+        shop["profile_photo"] = settings["profile_photo"]
+        return shop
+
+    def get_shop_settings(self, shop_id):
+        try:
+            res = self.client.table("queue") \
+                .select("phone") \
+                .eq("shop_id", shop_id) \
+                .eq("name", "__SYSTEM_SHOP_SETTINGS__") \
+                .execute()
+            
+            is_open = True
+            profile_photo = None
+            
+            if len(res.data) > 0:
+                import json
+                try:
+                    settings = json.loads(res.data[0]["phone"])
+                    is_open = settings.get("is_open", True)
+                    profile_photo = settings.get("profile_photo", None)
+                except Exception:
+                    pass
+            return {
+                "is_open": is_open,
+                "profile_photo": profile_photo
+            }
+        except Exception:
+            return {
+                "is_open": True,
+                "profile_photo": None
+            }
+
+    def save_shop_settings_kv(self, shop_id, profile_photo=None, is_open=None):
+        current = self.get_shop_settings(shop_id)
+        if profile_photo is not None:
+            current["profile_photo"] = profile_photo
+        if is_open is not None:
+            current["is_open"] = is_open
+            
+        import json
+        settings_str = json.dumps(current)
+        
+        try:
+            res = self.client.table("queue") \
+                .select("id") \
+                .eq("shop_id", shop_id) \
+                .eq("name", "__SYSTEM_SHOP_SETTINGS__") \
+                .execute()
+                
+            if len(res.data) > 0:
+                row_id = res.data[0]["id"]
+                self.client.table("queue").update({
+                    "phone": settings_str,
+                    "status": "completed"
+                }).eq("id", row_id).execute()
+            else:
+                self.client.table("queue").insert({
+                    "shop_id": shop_id,
+                    "name": "__SYSTEM_SHOP_SETTINGS__",
+                    "phone": settings_str,
+                    "token_number": -999,
+                    "status": "completed"
+                }).execute()
+        except Exception as e:
+            print("Failed to save settings KV:", e)
+            
+        return current
 
     def get_shop_by_id(self, shop_id):
         res = self.client.table("shops").select("*").eq("id", shop_id).execute()
         if len(res.data) == 0:
             return None
         shop = res.data[0]
-        # Attach default fallbacks for missing columns
-        if "is_open" not in shop:
-            shop["is_open"] = True
-        if "profile_photo" not in shop:
-            shop["profile_photo"] = None
+        # Attach defaults from metadata settings KV store
+        settings = self.get_shop_settings(shop_id)
+        shop["is_open"] = settings["is_open"]
+        shop["profile_photo"] = settings["profile_photo"]
         return shop
+
 
     def join_queue(self, shop_id, name, phone, service_type="General Inquiry", timezone_offset=0):
         try:
@@ -154,6 +224,7 @@ class SupabaseService:
             .select("*") \
             .eq("shop_id", shop_id) \
             .in_("status", ["waiting", "serving"]) \
+            .neq("name", "__SYSTEM_SHOP_SETTINGS__") \
             .gte("time_joined", start_iso) \
             .lt("time_joined", end_iso) \
             .order("token_number", desc=False) \
@@ -167,6 +238,7 @@ class SupabaseService:
             .select("*") \
             .eq("shop_id", shop_id) \
             .in_("status", ["completed", "skipped"]) \
+            .neq("name", "__SYSTEM_SHOP_SETTINGS__") \
             .gte("time_completed", start_iso) \
             .lt("time_completed", end_iso) \
             .order("time_completed", desc=True) \
@@ -484,6 +556,7 @@ class SupabaseService:
         res = self.client.table("queue") \
             .select("name, phone, token_number, status, time_joined") \
             .eq("shop_id", shop_id) \
+            .neq("name", "__SYSTEM_SHOP_SETTINGS__") \
             .gte("time_joined", start_iso) \
             .lt("time_joined", end_iso) \
             .order("token_number", desc=False) \
@@ -500,36 +573,37 @@ class SupabaseService:
         if len(res.data) == 0:
             return None
         shop = res.data[0]
-        # Ensure default fallbacks are present
-        if "is_open" not in shop:
-            shop["is_open"] = True
-        if "profile_photo" not in shop:
-            shop["profile_photo"] = None
+        # Attach settings KV
+        settings = self.get_shop_settings(shop_id)
+        shop["is_open"] = settings["is_open"]
+        shop["profile_photo"] = settings["profile_photo"]
         return shop
 
     def update_shop_settings(self, shop_id, profile_photo=None, is_open=None):
+        # Dual-sync step 1: Attempt updating database shops table if columns exist
         data = {}
         if profile_photo is not None:
             data["profile_photo"] = profile_photo
         if is_open is not None:
             data["is_open"] = is_open
 
-        if not data:
-            return self.get_shop_by_id(shop_id)
-
         try:
             res = self.client.table("shops").update(data).eq("id", shop_id).execute()
-            if len(res.data) == 0:
-                return None
-            return res.data[0]
-        except Exception as e:
-            # Fallback if profile_photo or is_open columns don't exist in Supabase yet
-            # Return current details with fallback simulation
-            shop = self.get_shop_by_id(shop_id)
-            if shop:
-                if profile_photo is not None:
-                    shop["profile_photo"] = profile_photo
-                if is_open is not None:
-                    shop["is_open"] = is_open
-            return shop
+            if len(res.data) > 0:
+                shop = res.data[0]
+                shop["is_open"] = res.data[0].get("is_open", is_open if is_open is not None else True)
+                shop["profile_photo"] = res.data[0].get("profile_photo", profile_photo)
+                # Keep KV backup in sync
+                self.save_shop_settings_kv(shop_id, profile_photo, is_open)
+                return shop
+        except Exception:
+            pass
+
+        # Fallback: Save to settings KV store in queue table
+        settings = self.save_shop_settings_kv(shop_id, profile_photo, is_open)
+        shop = self.get_shop_by_id(shop_id)
+        if shop:
+            shop["profile_photo"] = settings["profile_photo"]
+            shop["is_open"] = settings["is_open"]
+        return shop
 
